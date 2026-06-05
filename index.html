@@ -269,8 +269,8 @@ tr:hover td:first-child,tr:hover td:nth-child(2){background:var(--surface2);}
         </select>
       </div>
       <div class="filter-group" id="watchlistGroup" style="display:none">
-        <div class="filter-label">Watchlist (comma/line)</div>
-        <textarea class="watchlist-input" id="watchlistInput" placeholder="HDFCBANK, TCS"></textarea>
+        <div class="filter-label">Watchlist — tickers or ISINs (comma/line)</div>
+        <textarea class="watchlist-input" id="watchlistInput" placeholder="HDFCBANK, TCS  or  INE019A01014"></textarea>
       </div>
       <div class="filter-group" style="justify-content:flex-end">
         <div class="filter-label">&nbsp;</div>
@@ -522,6 +522,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let parsedRows        = [];
 let tableData         = { dates:[], stocks:[], grid:{}, volGrid:{} };
 let mtfTickers        = new Set();
+let mtfIsinMap        = {}; // ISIN → ticker
 let priceBands        = {};
 let circuitData       = null;
 let currentCircuitRows= [];
@@ -618,10 +619,10 @@ async function loadMtfTickers(force=false) {
   else {
     const PAGE=1000; let all=[],page=0;
     while(true) {
-      const {data,error}=await sb.from(MTF_TABLE).select('ticker').range(page*PAGE,(page+1)*PAGE-1);
+      const {data,error}=await sb.from(MTF_TABLE).select('ticker,isin').range(page*PAGE,(page+1)*PAGE-1);
       if(error||!data?.length) break; all=all.concat(data); if(data.length<PAGE) break; page++;
     }
-    mtfTickers=new Set(all.map(r=>r.ticker));
+    mtfTickers=new Set(all.map(r=>r.ticker)); mtfIsinMap={}; all.forEach(r=>{if(r.isin) mtfIsinMap[r.isin]=r.ticker;});
     sessionStorage.setItem('mtfTickers',JSON.stringify([...mtfTickers]));
   }
   const el=document.getElementById('mtfCurrentCount');
@@ -1020,42 +1021,88 @@ function setupAuxDragDrop(id,handler){
 
 // ─── BHAVCOPY UPLOAD ─────────────────────────────────────────────────────────
 
-// Parse a single CSV file (File object) and return {tradeDate, rows} or throw
+// Normalize a date string to YYYY-MM-DD
+function normalizeDate(val){
+  if(!val) return null;
+  // Already YYYY-MM-DD
+  if(/^\d{4}-\d{2}-\d{2}/.test(val)) return val.substring(0,10);
+  // DD-Mon-YYYY like 11-May-2026
+  const m=val.match(/^(\d{1,2})[\/-](\w{3})[\/-](\d{4})$/);
+  if(m){
+    const months={jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+    const mm=months[m[2].toLowerCase()];
+    if(mm) return m[3]+'-'+mm+'-'+m[1].padStart(2,'0');
+  }
+  return null;
+}
+
+// Parse rows from either format, returns {tradeDate, parsed}
+function parseBhavRows(rows, fields){
+  const has=(...cols)=>cols.every(c=>fields.includes(c));
+  let tradeDate, parsed;
+
+  if(has('TradDt','TckrSymb','SctySrs','ClsPric')){
+    // Standard BhavCopy format (34 cols)
+    tradeDate=rows[0]?.TradDt?.substring(0,10);
+    if(!tradeDate||isNaN(Date.parse(tradeDate))) throw 'Cannot parse TradDt';
+    parsed=rows.filter(r=>r.TckrSymb?.trim()&&r.ClsPric).map(r=>({
+      trade_date:tradeDate,ticker:r.TckrSymb?.trim(),series:r.SctySrs?.trim(),
+      open:parseFloat(r.OpnPric)||null,high:parseFloat(r.HghPric)||null,low:parseFloat(r.LwPric)||null,
+      close:parseFloat(r.ClsPric)||null,prev_close:parseFloat(r.PrvsClsgPric)||null,
+      volume:parseInt(r.TtlTradgVol)||null,
+    })).filter(r=>r.ticker&&r.close);
+  } else if(has('SYMBOL','SERIES','CLOSE','PREVCLOSE')){
+    // Alternate NSE CSV format (13 cols)
+    tradeDate=normalizeDate(rows[0]?.TIMESTAMP||rows[0]?.DATE);
+    if(!tradeDate) throw 'Cannot parse date from TIMESTAMP';
+    parsed=rows.filter(r=>r.SYMBOL?.trim()&&r.CLOSE).map(r=>({
+      trade_date:tradeDate,ticker:r.SYMBOL?.trim().toUpperCase(),series:r.SERIES?.trim(),
+      open:parseFloat(r.OPEN)||null,high:parseFloat(r.HIGH)||null,low:parseFloat(r.LOW)||null,
+      close:parseFloat(r.CLOSE)||null,prev_close:parseFloat(r.PREVCLOSE)||null,
+      volume:parseInt(r.TOTTRDQTY||r.TOTALTRDQTY)||null,
+    })).filter(r=>r.ticker&&r.close);
+  } else {
+    throw 'Unrecognized CSV format. Need standard BhavCopy or NSE daily CSV columns.';
+  }
+  return {tradeDate, parsed};
+}
+
+// Parse a single CSV file (File object) and return {tradeDate, parsed} or throw
 function parseBhavCopyCsv(file){
   return new Promise((resolve,reject)=>{
     Papa.parse(file,{header:true,skipEmptyLines:true,
       complete:result=>{
-        const rows=result.data;
-        const req=['TradDt','TckrSymb','SctySrs','ClsPric','PrvsClsgPric'];
-        const miss=req.filter(c=>!result.meta.fields.includes(c));
-        if(miss.length){reject('Missing columns: '+miss.join(', '));return;}
-        const tradeDate=rows[0]?.TradDt?.substring(0,10);
-        if(!tradeDate||isNaN(Date.parse(tradeDate))){reject('Cannot parse TradDt');return;}
-        const parsed=rows.filter(r=>r.TckrSymb?.trim()&&r.ClsPric).map(r=>({
-          trade_date:tradeDate,ticker:r.TckrSymb?.trim(),series:r.SctySrs?.trim(),
-          open:parseFloat(r.OpnPric)||null,high:parseFloat(r.HghPric)||null,low:parseFloat(r.LwPric)||null,
-          close:parseFloat(r.ClsPric)||null,prev_close:parseFloat(r.PrvsClsgPric)||null,volume:parseInt(r.TtlTradgVol)||null,
-        })).filter(r=>r.ticker&&r.close);
-        resolve({tradeDate,parsed,fileInfo:file.name});
+        try {
+          const {tradeDate, parsed}=parseBhavRows(result.data, result.meta.fields||[]);
+          resolve({tradeDate, parsed, fileInfo:file.name});
+        } catch(e) { reject(e); }
       },
       error:e=>reject(e.message)
     });
   });
 }
 
-// Extract CSV from a ZIP file and parse it
+// Extract CSV(s) from a ZIP file and parse each one
 async function extractZipAndParse(file){
   const zip=await JSZip.loadAsync(file);
-  const csvFiles=[];
+  const csvEntries=[];
   zip.forEach((path,entry)=>{
-    if(!entry.dir && path.toLowerCase().endsWith('.csv')) csvFiles.push(entry);
+    if(!entry.dir && path.toLowerCase().endsWith('.csv')) csvEntries.push({path,entry});
   });
-  if(!csvFiles.length) throw 'No CSV found inside ZIP';
-  // Use the first CSV found
-  const csvText=await csvFiles[0].async('string');
-  const blob=new Blob([csvText],{type:'text/csv'});
-  const csvFile=new File([blob],csvFiles[0].name,{type:'text/csv'});
-  return parseBhavCopyCsv(csvFile);
+  if(!csvEntries.length) throw 'No CSV found inside ZIP';
+  const results=[];
+  for(const ce of csvEntries){
+    const csvText=await ce.entry.async('string');
+    const blob=new Blob([csvText],{type:'text/csv'});
+    const csvFile=new File([blob],ce.path,{type:'text/csv'});
+    try {
+      const r=await parseBhavCopyCsv(csvFile);
+      results.push(r);
+    } catch(e) {
+      results.push({tradeDate:null, parsed:[], fileInfo:ce.path, error:e});
+    }
+  }
+  return results;
 }
 
 // Handle single file (legacy — CSV only)
@@ -1067,23 +1114,20 @@ function handleFile(file){
 
 function validateAndPrepare(result){
   const rows=result.data;
-  const req=['TradDt','TckrSymb','SctySrs','ClsPric','PrvsClsgPric'];
-  const miss=req.filter(c=>!result.meta.fields.includes(c));
-  if(miss.length){addStatus('err','✗ Missing: '+miss.join(', '));return;}
-  addStatus('ok','✓ Columns validated');
-  const tradeDate=rows[0]?.TradDt?.substring(0,10);
-  if(!tradeDate||isNaN(Date.parse(tradeDate))){addStatus('err','✗ Cannot parse TradDt');return;}
-  addStatus('ok','✓ Trade date: '+tradeDate);
-  const sc={};rows.forEach(r=>{const s=r.SctySrs?.trim()||'?';sc[s]=(sc[s]||0)+1;});
-  addStatus('ok','✓ Series: '+Object.entries(sc).sort((a,b)=>b[1]-a[1]).map(([s,c])=>s+':'+c).join(' | '));
-  parsedRows=rows.filter(r=>r.TckrSymb?.trim()&&r.ClsPric).map(r=>({
-    trade_date:tradeDate,ticker:r.TckrSymb?.trim(),series:r.SctySrs?.trim(),
-    open:parseFloat(r.OpnPric)||null,high:parseFloat(r.HghPric)||null,low:parseFloat(r.LwPric)||null,
-    close:parseFloat(r.ClsPric)||null,prev_close:parseFloat(r.PrvsClsgPric)||null,volume:parseInt(r.TtlTradgVol)||null,
-  })).filter(r=>r.ticker&&r.close);
-  addStatus('ok','✓ Ready: '+parsedRows.length+' rows');
-  addStatus('warn','  ⚠ Duplicates auto-skipped');
-  document.getElementById('uploadBtn').disabled=false;
+  const fields=result.meta.fields||[];
+  try {
+    const {tradeDate, parsed}=parseBhavRows(rows, fields);
+    addStatus('ok','✓ Columns validated');
+    addStatus('ok','✓ Trade date: '+tradeDate);
+    const sc={};parsed.forEach(r=>{sc[r.series]=(sc[r.series]||0)+1;});
+    addStatus('ok','✓ Series: '+Object.entries(sc).sort((a,b)=>b[1]-a[1]).map(([s,c])=>s+':'+c).join(' | '));
+    parsedRows=parsed;
+    addStatus('ok','✓ Ready: '+parsedRows.length+' rows');
+    addStatus('warn','  ⚠ Duplicates auto-skipped');
+    document.getElementById('uploadBtn').disabled=false;
+  } catch(e) {
+    addStatus('err','✗ '+e);
+  }
 }
 
 // Handle multiple files (CSV + ZIP mix)
@@ -1092,7 +1136,7 @@ async function handleBulkFiles(fileList){
   if(!files.length) return;
   clearStatus(); showProgress(0);
 
-  // Single CSV file — use existing flow
+  // Single CSV file — use existing single-file flow
   if(files.length===1 && files[0].name.toLowerCase().endsWith('.csv')){
     addStatus('info','📄 '+files[0].name);
     Papa.parse(files[0],{header:true,skipEmptyLines:true,complete:r=>validateAndPrepare(r),error:e=>addStatus('err','✗ '+e.message)});
@@ -1104,21 +1148,42 @@ async function handleBulkFiles(fileList){
   document.getElementById('uploadBtn').disabled=true;
 
   const allRows=[];
-  let fileErrors=0;
+  let fileCount=0, fileErrors=0, csvCount=0;
 
-  for(let i=0;i<files.length;i++){
-    const file=files[i];
+  for(let fi=0;fi<files.length;fi++){
+    const file=files[fi];
     const isZip=file.name.toLowerCase().endsWith('.zip');
-    const pct=Math.round((i/files.length)*100);
-    showProgress(pct);
+    showProgress(Math.round((fi/files.length)*80));
 
     try {
-      const result=isZip ? await extractZipAndParse(file) : await parseBhavCopyCsv(file);
-      allRows.push(...result.parsed);
-      addStatus('ok','✓ ['+(i+1)+'/'+files.length+'] '+file.name+'  '+result.tradeDate+'  '+result.parsed.length+' rows');
+      if(isZip){
+        // ZIP may contain multiple CSVs
+        const results=await extractZipAndParse(file);
+        let zipOk=0, zipErr=0;
+        for(const r of results){
+          csvCount++;
+          if(r.error){
+            zipErr++;
+            addStatus('err','✗ ['+csvCount+'] '+r.fileInfo+' — '+r.error);
+          } else {
+            zipOk++;
+            allRows.push(...r.parsed);
+            addStatus('ok','✓ ['+csvCount+'] '+r.fileInfo+' → '+r.tradeDate+' ('+r.parsed.length+' rows)');
+          }
+        }
+        if(zipOk) addStatus('ok','📁 '+file.name+': '+zipOk+'/'+results.length+' CSV(s) OK');
+        if(zipErr) addStatus('warn','  ⚠ '+zipErr+' CSV(s) failed in '+file.name);
+      } else {
+        // Single CSV file
+        csvCount++;
+        const result=await parseBhavCopyCsv(file);
+        allRows.push(...result.parsed);
+        addStatus('ok','✓ ['+csvCount+'] '+file.name+' → '+result.tradeDate+' ('+result.parsed.length+' rows)');
+      }
+      fileCount++;
     } catch(e) {
       fileErrors++;
-      addStatus('err','✗ ['+(i+1)+'/'+files.length+'] '+file.name+'  '+e);
+      addStatus('err','✗ '+file.name+' — '+e);
     }
   }
 
@@ -1128,7 +1193,7 @@ async function handleBulkFiles(fileList){
     return;
   }
 
-  addStatus('ok','✓ Total: '+allRows.length+' rows from '+(files.length-fileErrors)+' file(s)');
+  addStatus('ok','✓ Total: '+allRows.length+' rows from '+csvCount+' CSV(s) in '+files.length+' file(s)');
   if(fileErrors) addStatus('warn','  ⚠ '+fileErrors+' file(s) had errors');
 
   // Upload all rows in batches
@@ -1137,14 +1202,13 @@ async function handleBulkFiles(fileList){
   for(let i=0;i<allRows.length;i+=BATCH){
     const {error}=await sb.from(TABLE).upsert(allRows.slice(i,i+BATCH),{onConflict:'trade_date,ticker,series',ignoreDuplicates:true});
     if(error){addStatus('err','✗ Upload error: '+error.message);showProgress(0);return;}
-    done+=BATCH; showProgress(Math.min(100,Math.round(done/allRows.length*100)));
+    done+=BATCH; showProgress(80+Math.min(20,Math.round(done/allRows.length*20)));
   }
   showProgress(100);
   addStatus('ok','✓ Upload complete! '+allRows.length+' rows');
-  showToast('✓ Uploaded '+allRows.length+' rows from '+(files.length-fileErrors)+' file(s)','success');
+  showToast('✓ Uploaded '+allRows.length+' rows from '+csvCount+' CSV(s)','success');
   circuitData=null; await Promise.all([loadData(),loadHistory()]);
 }
-
 async function uploadData(){
   if(!parsedRows.length) return;
   document.getElementById('uploadBtn').disabled=true;
@@ -1184,7 +1248,13 @@ async function loadData(){
       document.getElementById('tableContainer').innerHTML='<div class="empty-state"><div class="e-icon">📋</div><p>No MTF list uploaded yet. Go to <b>Upload</b> tab.</p></div>';
       document.getElementById('tableMeta').textContent=''; return;
     }
-  } else if(view==='watchlist') tickerFilter=wl;
+  } else if(view==='watchlist'){
+    // Resolve ISINs → tickers using mtfIsinMap
+    tickerFilter=wl.map(s=>{
+      if(mtfIsinMap[s]) return mtfIsinMap[s]; // ISIN → ticker
+      return s; // already a ticker or unknown
+    });
+  }
 
   document.getElementById('tableContainer').innerHTML=`<div id="tableSkeleton">
     <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div>
