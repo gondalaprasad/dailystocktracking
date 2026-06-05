@@ -1,0 +1,1507 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BhavDash — NSE Market Data</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+/* ── DARK THEME ── */
+[data-theme="dark"] {
+  --bg:#0a0e1a; --surface:#111827; --surface2:#1a2235; --border:#1e2d45;
+  --accent:#00d4aa; --accent2:#0099ff; --danger:#ff4757; --warn:#ffa502;
+  --text:#e2e8f0; --text2:#7a8fa6; --text3:#3d5166;
+  --green:#00d4aa; --red:#ff4757;
+  --grid-line:rgba(0,212,170,.03);
+  --shadow:rgba(0,0,0,.4);
+  --th-bg:#1a2235; --td-sticky:#111827;
+}
+/* ── LIGHT THEME ── */
+[data-theme="light"] {
+  --bg:#f0f4f8; --surface:#ffffff; --surface2:#e8edf5; --border:#d0dae8;
+  --accent:#00a884; --accent2:#0077cc; --danger:#e5263a; --warn:#e07b00;
+  --text:#1a2235; --text2:#4a5e78; --text3:#9aafc4;
+  --green:#00a884; --red:#e5263a;
+  --grid-line:rgba(0,120,80,.04);
+  --shadow:rgba(0,0,0,.12);
+  --th-bg:#e8edf5; --td-sticky:#ffffff;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 24px 60px;}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 28px;border-bottom:1px solid var(--border);margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#fff;}
+.logo-text{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;letter-spacing:-.5px;}
+.logo-sub{font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace;letter-spacing:2px;text-transform:uppercase;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);transition:background .3s;flex-shrink:0;}
+.status-dot.connected{background:var(--accent);box-shadow:0 0 8px var(--accent);}
+.status-label{font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+.theme-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* TABS */
+.tabs{display:flex;gap:2px;margin-bottom:24px;border-bottom:1px solid var(--border);overflow-x:auto;}
+.tab{padding:9px 18px;font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--text2);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;letter-spacing:.5px;white-space:nowrap;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.panel{display:none;}.panel.active{display:block;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:18px;transition:background .25s,border-color .25s;}
+.card-title{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.card-title::before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px;flex-shrink:0;}
+
+/* INPUTS */
+.lock-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;}
+.lock-icon{font-size:48px;margin-bottom:20px;opacity:.5;}
+.lock-title{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;margin-bottom:8px;}
+.lock-sub{font-size:14px;color:var(--text2);margin-bottom:32px;}
+.input-group{display:flex;gap:10px;width:100%;max-width:400px;}
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s,background .25s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+textarea{resize:vertical;min-height:80px;}
+select{min-width:130px;}
+
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .2s;white-space:nowrap;letter-spacing:.3px;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.btn-primary:disabled{background:var(--text3);color:var(--surface2);cursor:not-allowed;transform:none;filter:none;}
+.btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text2);}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger);}
+.btn-danger:hover{background:var(--danger);color:#fff;}
+.btn-sm{padding:5px 11px;font-size:11px;}
+
+/* UPLOAD */
+.upload-area{border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.upload-area:hover,.upload-area.drag-over{border-color:var(--accent);background:rgba(0,212,170,.04);}
+.upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:32px;margin-bottom:10px;}
+.upload-text{font-size:14px;font-weight:500;margin-bottom:4px;}
+.upload-sub{font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+
+/* STATUS */
+.status-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:14px;display:none;max-height:500px;overflow-y:auto;}
+.status-box.show{display:block;}
+.status-line{padding:2px 0;}
+.status-line.ok{color:var(--green);}
+.status-line.err{color:var(--red);}
+.status-line.warn{color:var(--warn);}
+.status-line.info{color:var(--text2);}
+.progress-bar-wrap{background:var(--surface2);border-radius:4px;height:5px;margin-top:10px;overflow:hidden;display:none;}
+.progress-bar-wrap.show{display:block;}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;transition:width .3s;width:0%;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;transition:background .25s;}
+.stat-label{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.stat-value{font-size:20px;font-family:'IBM Plex Mono',monospace;font-weight:600;}
+.stat-value.green{color:var(--green);}
+.stat-value.red{color:var(--red);}
+
+/* CIRCUIT */
+.circuit-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.circuit-title{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:8px;}
+.circuit-title::before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px;}
+.circuit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;}
+.circuit-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.circuit-card-title{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+.circuit-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);}
+.circuit-row:last-child{border-bottom:none;}
+.circuit-row-label{font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--text2);}
+.circuit-count{font-size:16px;font-family:'IBM Plex Mono',monospace;font-weight:600;cursor:pointer;transition:color .2s;}
+.circuit-count:hover{color:var(--accent);}
+.circuit-count.uc{color:var(--green);}
+.circuit-count.lc{color:var(--red);}
+.circuit-count.zero{color:var(--text3);cursor:default;}
+
+/* FILTERS */
+.filters-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px;}
+.filter-group{display:flex;flex-direction:column;gap:5px;}
+.filter-label{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--text2);letter-spacing:1px;text-transform:uppercase;}
+.watchlist-input{min-width:240px;height:36px!important;min-height:36px!important;resize:none;overflow:hidden;}
+
+/* TABLE */
+.export-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.table-meta{font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:12px;max-height:620px;}
+table{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+thead{position:sticky;top:0;z-index:10;}
+th{background:var(--th-bg);padding:10px 12px;text-align:right;font-size:10px;font-weight:600;letter-spacing:.8px;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap;transition:background .25s;}
+th:first-child{text-align:left;position:sticky;left:0;z-index:11;min-width:110px;}
+th:nth-child(2){text-align:center;position:sticky;left:110px;z-index:11;}
+td{padding:8px 12px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;transition:background .1s;vertical-align:middle;}
+td:first-child{text-align:left;position:sticky;left:0;background:var(--td-sticky);z-index:1;font-weight:500;min-width:110px;}
+td:nth-child(2){text-align:center;position:sticky;left:110px;background:var(--td-sticky);z-index:1;border-right:1px solid var(--border);}
+tr:hover td{background:var(--surface2);}
+tr:hover td:first-child,tr:hover td:nth-child(2){background:var(--surface2);}
+.pct-pos{color:var(--green);}
+.pct-neg{color:var(--red);}
+.pct-zero{color:var(--text3);}
+.pct-null{color:var(--text3);font-size:10px;}
+.vol-sub{display:block;font-size:9px;color:var(--text3);margin-top:2px;letter-spacing:.3px;}
+/* STREAK BADGES */
+.streak{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
+.streak-uc-c{background:rgba(0,212,170,.15);color:var(--green);border:1px solid rgba(0,212,170,.3);}
+.streak-lc-c{background:rgba(255,71,87,.12);color:var(--red);border:1px solid rgba(255,71,87,.25);}
+.streak-uc-w{background:rgba(0,212,170,.07);color:var(--green);border:1px dashed rgba(0,212,170,.3);}
+.streak-lc-w{background:rgba(255,71,87,.06);color:var(--red);border:1px dashed rgba(255,71,87,.25);}
+.streak-none{color:var(--text3);font-size:11px;}
+
+/* SKELETON */
+.skeleton{background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.skeleton-row{height:38px;margin-bottom:6px;}
+.skeleton-stat{height:64px;border-radius:10px;}
+
+/* MISC */
+.empty-state{text-align:center;padding:50px 20px;color:var(--text2);}
+.empty-state .e-icon{font-size:36px;margin-bottom:10px;opacity:.35;}
+.empty-state p{font-size:13px;}
+#toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-family:'IBM Plex Mono',monospace;font-size:12px;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:340px;box-shadow:0 4px 20px var(--shadow);}
+#toast.show{transform:translateY(0);opacity:1;}
+#toast.success{border-color:var(--green);color:var(--green);}
+#toast.error{border-color:var(--red);color:var(--red);}
+#toast.warn{border-color:var(--warn);color:var(--warn);}
+.pill{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10px;font-family:'IBM Plex Mono',monospace;background:rgba(0,212,170,.1);color:var(--accent);border:1px solid rgba(0,212,170,.2);}
+.upload-history-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);}
+.upload-history-item .date{color:var(--accent);}
+
+/* CALENDAR */
+.cal-year{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;justify-content:flex-start;}
+.cal-year::-webkit-scrollbar{height:4px;}
+.cal-year::-webkit-scrollbar-track{background:var(--surface2);border-radius:2px;}
+.cal-year::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.cal-month-block{display:flex;flex-direction:column;align-items:flex-start;gap:5px;flex-shrink:0;}
+.cal-month-name{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--text2);letter-spacing:1px;text-transform:uppercase;padding-left:18px;}
+.cal-day{width:13px;height:13px;border-radius:2px;cursor:default;transition:transform .1s;flex-shrink:0;}
+.cal-day:hover{transform:scale(1.5);z-index:10;position:relative;}
+.cal-day.empty{background:transparent;pointer-events:none;}
+.cal-day.no-data{background:var(--surface2);border:1px solid var(--border);}
+.cal-day.weekend{background:var(--border);opacity:.4;}
+.cal-day.uploaded-lo{background:rgba(0,168,132,.35);}
+.cal-day.uploaded-mid{background:rgba(0,168,132,.65);}
+.cal-day.uploaded-hi{background:var(--accent);}
+.cal-dow-labels{display:flex;flex-direction:column;gap:2px;margin-right:3px;}
+.cal-dow-label{font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--text3);height:13px;line-height:13px;width:14px;text-align:right;}
+
+/* KITE FETCH */
+.kite-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+@media(max-width:600px){.kite-grid{grid-template-columns:1fr;}}
+.kite-progress{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:12px;display:none;}
+.kite-progress.show{display:block;}
+.kite-prog-bar-wrap{background:var(--border);border-radius:3px;height:6px;margin:10px 0 6px;overflow:hidden;}
+.kite-prog-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .4s;width:0%;}
+
+@media(max-width:600px){header{flex-direction:column;align-items:flex-start;}.filters-row{flex-direction:column;}.input-group{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">₹</div>
+    <div>
+      <div class="logo-text">BhavDash</div>
+      <div class="logo-sub">NSE Market Data</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle light/dark">🌙</button>
+    <div class="status-dot" id="statusDot"></div>
+    <span class="status-label" id="statusLabel">connecting...</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('view',this)">📊 Dashboard</button>
+  <button class="tab" onclick="switchTab('circuit',this)">⚡ Circuit</button>
+  <button class="tab" onclick="switchTab('upload',this)">⬆ Upload</button>
+  <button class="tab" onclick="switchTab('kite',this)">🔌 Kite Fetch</button>
+  <button class="tab" onclick="switchTab('history',this)">📁 History</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="panel active" id="panel-view">
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card"><div class="stat-label">Stocks</div><div class="stat-value" id="statStocks">—</div></div>
+    <div class="stat-card"><div class="stat-label">Days</div><div class="stat-value" id="statDays">—</div></div>
+    <div class="stat-card"><div class="stat-label">Latest Date</div><div class="stat-value" style="font-size:13px;margin-top:4px" id="statLastDate">—</div></div>
+    <div class="stat-card"><div class="stat-label">Advancers</div><div class="stat-value green" id="statAdv">—</div></div>
+    <div class="stat-card"><div class="stat-label">Decliners</div><div class="stat-value red" id="statDec">—</div></div>
+    <div class="stat-card"><div class="stat-label">MTF Stocks</div><div class="stat-value" id="statMtf">—</div></div>
+    <div class="stat-card"><div class="stat-label">Price Bands</div><div class="stat-value" id="statBands">—</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Filters</div>
+    <div class="filters-row">
+      <div class="filter-group"><div class="filter-label">From</div><input type="date" id="filterFrom"/></div>
+      <div class="filter-group"><div class="filter-label">To</div><input type="date" id="filterTo"/></div>
+      <div class="filter-group">
+        <div class="filter-label">Series</div>
+        <select id="filterSeries">
+          <option value="EQ" selected>EQ</option>
+          <option value="ALL">All</option>
+          <option value="BE">BE</option>
+          <option value="SM">SM</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">View</div>
+        <select id="filterView" onchange="onViewChange()">
+          <option value="mtf" selected>MTF Only</option>
+          <option value="watchlist">Watchlist</option>
+          <option value="all">All Stocks</option>
+        </select>
+      </div>
+      <div class="filter-group" id="watchlistGroup" style="display:none">
+        <div class="filter-label">Watchlist (comma/line)</div>
+        <textarea class="watchlist-input" id="watchlistInput" placeholder="HDFCBANK, TCS"></textarea>
+      </div>
+      <div class="filter-group" style="justify-content:flex-end">
+        <div class="filter-label">&nbsp;</div>
+        <button class="btn btn-primary" onclick="loadData()">Apply</button>
+      </div>
+      <div class="filter-group" style="justify-content:flex-end">
+        <div class="filter-label">&nbsp;</div>
+        <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="export-row">
+    <span class="table-meta" id="tableMeta"></span>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace"><span style="color:var(--text2)">NA</span>=not in BhavCopy</span>
+      <button class="btn btn-secondary btn-sm" onclick="exportCSV('mtf')">⬇ MTF CSV</button>
+      <button class="btn btn-secondary btn-sm" onclick="exportCSV('all')">⬇ Full CSV</button>
+    </div>
+  </div>
+  <div id="tableContainer">
+    <div id="tableSkeleton">
+      <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div>
+      <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div>
+      <div class="skeleton skeleton-row"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CIRCUIT -->
+<div class="panel" id="panel-circuit">
+  <div class="circuit-header">
+    <div class="circuit-title">⚡ Circuit Analytics</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace">Scope:</span>
+      <select id="circuitScope" onchange="renderCircuit()" style="min-width:150px;font-size:12px;padding:6px 10px">
+        <option value="mtf" selected>MTF Only</option>
+        <option value="all">All Stocks</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="circuitData=null;loadCircuitData()">↺ Refresh</button>
+    </div>
+  </div>
+  <div id="circuitLoading" style="display:none">
+    <div class="skeleton skeleton-row" style="margin-bottom:8px"></div>
+    <div class="skeleton skeleton-row"></div>
+  </div>
+  <div class="circuit-grid" id="circuitGrid">
+    <div class="circuit-card"><div class="circuit-card-title">🟢 Upper Circuit</div><div id="ucRows"><div style="color:var(--text3);font-size:12px">Loading...</div></div></div>
+    <div class="circuit-card"><div class="circuit-card-title">🔴 Lower Circuit</div><div id="lcRows"><div style="color:var(--text3);font-size:12px">Loading...</div></div></div>
+    <div class="circuit-card"><div class="circuit-card-title">📊 Band Distribution</div><div id="bandRows"><div style="color:var(--text3);font-size:12px">Loading...</div></div></div>
+    <div class="circuit-card"><div class="circuit-card-title">📅 Latest Day</div><div id="summaryRows"><div style="color:var(--text3);font-size:12px">Loading...</div></div></div>
+  </div>
+  <div id="circuitTableSection" style="display:none;margin-top:20px">
+    <div class="export-row">
+      <span id="circuitTableTitle" style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--accent)"></span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" onclick="exportCircuitCSV()">⬇ CSV</button>
+        <button class="btn btn-secondary btn-sm" onclick="closeCircuitTable()">✕ Close</button>
+      </div>
+    </div>
+    <div id="circuitTableContainer"></div>
+  </div>
+</div>
+
+<!-- UPLOAD -->
+<div class="panel" id="panel-upload">
+  <div id="lockScreen">
+    <div class="card">
+      <div class="lock-screen">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-title">Upload Access</div>
+        <div class="lock-sub">Enter password to enable uploads</div>
+        <div class="input-group">
+          <input type="password" id="pwInput" placeholder="Password" onkeydown="if(event.key==='Enter')unlock()"/>
+          <button class="btn btn-primary" onclick="unlock()">Unlock</button>
+        </div>
+        <div id="pwError" style="color:var(--red);font-size:12px;margin-top:12px;font-family:'IBM Plex Mono',monospace;display:none">✗ Incorrect password</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="uploadForm" style="display:none">
+    <!-- BhavCopy -->
+    <div class="card">
+      <div class="card-title">Upload BhavCopy CSV</div>
+      <div class="upload-area" id="uploadArea">
+        <input type="file" accept=".csv,.zip" id="csvFile" onchange="handleBulkFiles(this.files)" multiple/>
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">Drop BhavCopy CSV or ZIP here</div>
+        <div class="upload-sub">BhavCopy_NSE_CM_*.csv · *.zip · select multiple</div>
+      </div>
+      <div class="progress-bar-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="status-box" id="statusBox"></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" id="uploadBtn" onclick="uploadData()" disabled>Upload to Supabase</button>
+        <button class="btn btn-secondary" onclick="clearUpload()">Clear</button>
+        <button class="btn btn-danger" onclick="lock()" style="margin-left:auto">🔒 Lock</button>
+      </div>
+    </div>
+    <!-- MTF -->
+    <div class="card">
+      <div class="card-title">MTF Approved Securities</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.7">
+        Download from <a href="https://zerodha.com/mtf-approved-securities/" target="_blank" style="color:var(--accent)">zerodha.com/mtf-approved-securities</a>.
+        Columns: <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent)">tradingsymbol, isin, category, margin, leverage</span>
+      </p>
+      <div class="upload-area" id="mtfUploadArea" style="padding:28px">
+        <input type="file" accept=".csv" id="mtfCsvFile" onchange="handleMtfFile(this.files[0])"/>
+        <div class="upload-icon" style="font-size:24px">📋</div>
+        <div class="upload-text" style="font-size:13px">Drop MTF CSV</div>
+        <div class="upload-sub">tradingsymbol · isin · category · margin · leverage</div>
+      </div>
+      <div class="status-box" id="mtfStatusBox"></div>
+      <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+        <button class="btn btn-primary" id="mtfUploadBtn" onclick="uploadMtfList()" disabled>Save MTF List</button>
+        <span id="mtfCurrentCount" style="font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace"></span>
+      </div>
+    </div>
+    <!-- Price Band -->
+    <div class="card">
+      <div class="card-title">Price Band / Circuit List</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.7">
+        Upload NSE daily price band CSV (sec_list.csv). Columns: <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent)">Symbol, Series, Band, Remarks</span>
+      </p>
+      <div class="upload-area" id="bandUploadArea" style="padding:28px">
+        <input type="file" accept=".csv" id="bandCsvFile" onchange="handleBandFile(this.files[0])"/>
+        <div class="upload-icon" style="font-size:24px">📊</div>
+        <div class="upload-text" style="font-size:13px">Drop Price Band CSV</div>
+        <div class="upload-sub">sec_list.csv · Band: 2 / 5 / 10 / 20 / No Band</div>
+      </div>
+      <div class="status-box" id="bandStatusBox"></div>
+      <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+        <button class="btn btn-primary" id="bandUploadBtn" onclick="uploadBandList()" disabled>Save Price Bands</button>
+        <span id="bandCurrentCount" style="font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KITE FETCH -->
+<div class="panel" id="panel-kite">
+  <div id="kiteLockScreen">
+    <div class="card">
+      <div class="lock-screen">
+        <div class="lock-icon">🔌</div>
+        <div class="lock-title">Kite Fetch</div>
+        <div class="lock-sub">Enter password to access Kite data fetch</div>
+        <div class="input-group">
+          <input type="password" id="kitePwInput" placeholder="Password" onkeydown="if(event.key==='Enter')kiteUnlock()"/>
+          <button class="btn btn-primary" onclick="kiteUnlock()">Unlock</button>
+        </div>
+        <div id="kitePwError" style="color:var(--red);font-size:12px;margin-top:12px;font-family:'IBM Plex Mono',monospace;display:none">✗ Incorrect password</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="kiteForm" style="display:none">
+    <div class="card">
+      <div class="card-title">Kite Connect — Fetch Historical Data</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.7">
+        Fetches daily OHLCV data for all MTF stocks (or all NSE EQ) from Kite API and stores directly into Supabase.
+        Your API key and access token are <b style="color:var(--text)">never stored</b> — used only for this fetch session.
+        Access tokens expire daily so you'll enter a fresh one each time.
+      </p>
+      <div class="kite-grid">
+        <div class="filter-group">
+          <div class="filter-label">Kite API Key</div>
+          <input type="text" id="kiteApiKey" placeholder="Your Kite API Key"/>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Access Token (today's)</div>
+          <input type="text" id="kiteAccessToken" placeholder="Today's Access Token"/>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">From Date</div>
+          <input type="date" id="kiteFrom"/>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">To Date</div>
+          <input type="date" id="kiteTo"/>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary" id="kiteFetchBtn" onclick="startKiteFetch()">🔌 Fetch &amp; Upload</button>
+        <button class="btn btn-danger" onclick="kiteUnlock(true)" style="margin-left:auto">🔒 Lock</button>
+      </div>
+      <div class="kite-progress" id="kiteProgress">
+        <div id="kiteProgressText" style="color:var(--text2);margin-bottom:6px">Starting...</div>
+        <div class="kite-prog-bar-wrap"><div class="kite-prog-bar" id="kiteProgBar"></div></div>
+        <div id="kiteProgressSub" style="font-size:11px;color:var(--text3)"></div>
+      </div>
+      <div class="status-box" id="kiteStatusBox" style="margin-top:12px"></div>
+    </div>
+    <div class="card" style="background:rgba(255,165,0,.04);border-color:rgba(255,165,0,.2)">
+      <div class="card-title" style="color:var(--warn)">ℹ️ Notes</div>
+      <ul style="font-size:12px;color:var(--text2);line-height:2;padding-left:18px;">
+        <li>Kite historical API rate limit: <b style="color:var(--text)">2–3 requests/sec</b> — fetch is throttled automatically</li>
+        <li>Fetching all ~1500 MTF stocks for 1 date range takes <b style="color:var(--text)">~10–12 minutes</b></li>
+        <li>Duplicate rows (same date+ticker) are automatically skipped</li>
+        <li>Access token is valid only for today — generate fresh from Kite developer console</li>
+        <li>Daily candle data available up to <b style="color:var(--text)">2000 days</b> per request</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="panel" id="panel-history">
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <span style="display:flex;align-items:center;gap:8px">
+        <span style="width:3px;height:14px;background:var(--accent);border-radius:2px;display:inline-block"></span>
+        Upload Calendar
+      </span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="historyMeta" style="font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-weight:400;letter-spacing:0;text-transform:none"></span>
+        <select id="calYearSelect" onchange="renderCalendarForYear()" style="padding:4px 10px;font-size:12px;min-width:80px"></select>
+      </div>
+    </div>
+    <div id="calendarWrap" style="padding:8px 0 12px"></div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2)">
+      <span style="color:var(--text3)">Not uploaded</span>
+      <span style="width:12px;height:12px;border-radius:2px;background:var(--surface2);border:1px solid var(--border);display:inline-block"></span>
+      <span style="width:12px;height:12px;border-radius:2px;background:rgba(0,168,132,.35);display:inline-block"></span>
+      <span style="width:12px;height:12px;border-radius:2px;background:rgba(0,168,132,.65);display:inline-block"></span>
+      <span style="width:12px;height:12px;border-radius:2px;background:var(--accent);display:inline-block"></span>
+      <span style="color:var(--text3)">Uploaded · Hover for details</span>
+    </div>
+    <div id="historyList" style="margin-top:20px"></div>
+  </div>
+</div>
+
+</div><!-- /app -->
+<div id="toast"></div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const SUPABASE_URL  = 'https://dlldfbvdtclkjkeyedfr.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsbGRmYnZkdGNsa2prZXllZGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTQ1NzIsImV4cCI6MjA5NjEzMDU3Mn0.i5XXXL-CjjJxE9-raLAWIJ_5e4bh4uomttHZ_jZK_5g';
+const PW_HASH       = 'c6921db35433b952fc0aaf3c5be362be013a294cf24d4633adcdcf7c91e4c4c9';
+const EDGE_URL      = 'https://dlldfbvdtclkjkeyedfr.supabase.co/functions/v1/kite-fetch';
+const TABLE         = 'bhav_data';
+const MTF_TABLE     = 'mtf_tickers';
+const BAND_TABLE    = 'price_bands';
+const DEFAULT_DAYS  = 7; // default last N trading days
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let parsedRows        = [];
+let tableData         = { dates:[], stocks:[], grid:{}, volGrid:{} };
+let mtfTickers        = new Set();
+let priceBands        = {};
+let circuitData       = null;
+let currentCircuitRows= [];
+let _historyCounts    = {}, _historyMaxCount=1, _historyYears=[];
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  // Theme
+  const saved = localStorage.getItem('bhavTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('themeBtn').textContent = saved==='dark'?'🌙':'☀️';
+
+  // Default dates: today and 14 days back
+  const today = new Date();
+  const past  = new Date(today); past.setDate(past.getDate()-14);
+  document.getElementById('kiteFrom').value = fmtDate(past);
+  document.getElementById('kiteTo').value   = fmtDate(today);
+
+  setupDragDrop();
+  setupAuxDragDrop('mtfUploadArea',  handleMtfFile);
+  setupAuxDragDrop('bandUploadArea', handleBandFile);
+
+  await Promise.all([checkConnection(), loadMtfTickers(), loadPriceBands()]);
+  await Promise.all([loadData(), loadHistory()]);
+});
+
+// ─── THEME ────────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  document.getElementById('themeBtn').textContent = next==='dark'?'🌙':'☀️';
+  localStorage.setItem('bhavTheme',next);
+}
+
+// ─── CONNECTION ───────────────────────────────────────────────────────────────
+async function checkConnection() {
+  try {
+    const {error} = await sb.from(TABLE).select('trade_date',{count:'exact',head:true});
+    if (error) throw error;
+    document.getElementById('statusDot').classList.add('connected');
+    document.getElementById('statusLabel').textContent = 'connected';
+  } catch(e) {
+    document.getElementById('statusLabel').textContent = 'error';
+  }
+}
+
+// ─── PASSWORD ─────────────────────────────────────────────────────────────────
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function unlock() {
+  const h = await sha256(document.getElementById('pwInput').value);
+  if (h===PW_HASH) {
+    document.getElementById('lockScreen').style.display='none';
+    document.getElementById('uploadForm').style.display='block';
+    document.getElementById('pwError').style.display='none';
+    document.getElementById('pwInput').value='';
+  } else {
+    document.getElementById('pwError').style.display='block';
+    document.getElementById('pwInput').value='';
+  }
+}
+function lock() {
+  document.getElementById('lockScreen').style.display='block';
+  document.getElementById('uploadForm').style.display='none';
+  clearUpload();
+}
+async function kiteUnlock(doLock=false) {
+  if (doLock) {
+    document.getElementById('kiteLockScreen').style.display='block';
+    document.getElementById('kiteForm').style.display='none';
+    document.getElementById('kiteApiKey').value='';
+    document.getElementById('kiteAccessToken').value='';
+    return;
+  }
+  const h = await sha256(document.getElementById('kitePwInput').value);
+  if (h===PW_HASH) {
+    document.getElementById('kiteLockScreen').style.display='none';
+    document.getElementById('kiteForm').style.display='block';
+    document.getElementById('kitePwError').style.display='none';
+    document.getElementById('kitePwInput').value='';
+  } else {
+    document.getElementById('kitePwError').style.display='block';
+    document.getElementById('kitePwInput').value='';
+  }
+}
+
+// ─── MTF ──────────────────────────────────────────────────────────────────────
+async function loadMtfTickers(force=false) {
+  const cached = sessionStorage.getItem('mtfTickers');
+  if (cached&&!force) { mtfTickers=new Set(JSON.parse(cached)); }
+  else {
+    const PAGE=1000; let all=[],page=0;
+    while(true) {
+      const {data,error}=await sb.from(MTF_TABLE).select('ticker').range(page*PAGE,(page+1)*PAGE-1);
+      if(error||!data?.length) break; all=all.concat(data); if(data.length<PAGE) break; page++;
+    }
+    mtfTickers=new Set(all.map(r=>r.ticker));
+    sessionStorage.setItem('mtfTickers',JSON.stringify([...mtfTickers]));
+  }
+  const el=document.getElementById('mtfCurrentCount');
+  if(el) el.textContent=mtfTickers.size?`${mtfTickers.size} MTF stocks stored`:'No MTF list yet';
+  const s=document.getElementById('statMtf'); if(s) s.textContent=mtfTickers.size||'—';
+}
+
+function handleMtfFile(file) {
+  if(!file?.name.endsWith('.csv')){showToast('Need .csv','error');return;}
+  const box=document.getElementById('mtfStatusBox'); box.innerHTML=''; box.classList.add('show');
+  addBoxStatus(box,'info',`📄 ${file.name}`);
+  Papa.parse(file,{header:true,skipEmptyLines:true,complete:result=>{
+    const rows=result.data,fields=result.meta.fields||[];
+    const symCol=fields.find(f=>/tradingsymbol|symbol/i.test(f));
+    if(!symCol){addBoxStatus(box,'err','✗ No symbol column');return;}
+    const isinCol=fields.find(f=>/isin/i.test(f));
+    const catCol=fields.find(f=>/category/i.test(f));
+    const marCol=fields.find(f=>/margin/i.test(f));
+    const levCol=fields.find(f=>/leverage/i.test(f));
+    const tickers=rows.map(r=>({
+      ticker:(r[symCol]||'').trim().toUpperCase(),
+      isin:isinCol?(r[isinCol]||'').trim():null,
+      category:catCol?(r[catCol]||'').trim():null,
+      margin:marCol?parseFloat(r[marCol])||null:null,
+      leverage:levCol?parseFloat(r[levCol])||null:null,
+      upload_date:new Date().toISOString().slice(0,10)
+    })).filter(r=>r.ticker);
+    addBoxStatus(box,'ok',`✓ ${tickers.length} tickers`);
+    addBoxStatus(box,'warn','⚠ Click Save MTF List');
+    window._pendingMtf=tickers;
+    document.getElementById('mtfUploadBtn').disabled=false;
+  },error:e=>addBoxStatus(box,'err','Parse error: '+e.message)});
+}
+
+async function uploadMtfList() {
+  const rows=window._pendingMtf; if(!rows?.length) return;
+  const box=document.getElementById('mtfStatusBox');
+  document.getElementById('mtfUploadBtn').disabled=true;
+  addBoxStatus(box,'info','⏳ Clearing...');
+  await sb.from(MTF_TABLE).delete().neq('ticker','__NONE__');
+  addBoxStatus(box,'info',`⏳ Inserting ${rows.length} rows...`);
+  const BATCH=500;
+  for(let i=0;i<rows.length;i+=BATCH){
+    const {error}=await sb.from(MTF_TABLE).upsert(rows.slice(i,i+BATCH),{onConflict:'ticker'});
+    if(error){addBoxStatus(box,'err','✗ '+error.message);return;}
+  }
+  addBoxStatus(box,'ok',`✓ Saved ${rows.length} MTF stocks`);
+  showToast(`✓ MTF updated: ${rows.length}`,'success');
+  window._pendingMtf=null; sessionStorage.removeItem('mtfTickers');
+  await loadMtfTickers(true); circuitData=null; await loadData();
+}
+
+// ─── PRICE BANDS ──────────────────────────────────────────────────────────────
+async function loadPriceBands(force=false) {
+  const cached=sessionStorage.getItem('priceBands');
+  if(cached&&!force){priceBands=JSON.parse(cached);}
+  else {
+    const PAGE=1000; let all=[],page=0;
+    while(true){
+      const {data,error}=await sb.from(BAND_TABLE).select('ticker,band').range(page*PAGE,(page+1)*PAGE-1);
+      if(error||!data?.length) break; all=all.concat(data); if(data.length<PAGE) break; page++;
+    }
+    priceBands={}; all.forEach(r=>{priceBands[r.ticker]=r.band;});
+    sessionStorage.setItem('priceBands',JSON.stringify(priceBands));
+  }
+  const count=Object.keys(priceBands).length;
+  const el=document.getElementById('bandCurrentCount'); if(el) el.textContent=count?`${count} stocks`:' No bands yet';
+  const s=document.getElementById('statBands'); if(s) s.textContent=count||'—';
+}
+
+function handleBandFile(file) {
+  if(!file?.name.endsWith('.csv')){showToast('Need .csv','error');return;}
+  const box=document.getElementById('bandStatusBox'); box.innerHTML=''; box.classList.add('show');
+  addBoxStatus(box,'info',`📄 ${file.name}`);
+  Papa.parse(file,{header:true,skipEmptyLines:true,complete:result=>{
+    const rows=result.data,fields=result.meta.fields||[];
+    const symCol=fields.find(f=>/^symbol$/i.test(f));
+    const serCol=fields.find(f=>/^series$/i.test(f));
+    const bandCol=fields.find(f=>/^band$/i.test(f));
+    const remCol=fields.find(f=>/remark/i.test(f));
+    if(!symCol||!bandCol){addBoxStatus(box,'err','✗ Need Symbol+Band cols');return;}
+    const bc={};
+    const mapped=rows.map(r=>{
+      const b=(r[bandCol]||'').trim(); bc[b]=(bc[b]||0)+1;
+      return{ticker:(r[symCol]||'').trim().toUpperCase(),series:serCol?(r[serCol]||'').trim():null,band:b,remarks:remCol?(r[remCol]||'').trim():null,upload_date:new Date().toISOString().slice(0,10)};
+    }).filter(r=>r.ticker);
+    addBoxStatus(box,'ok',`✓ ${mapped.length} rows: ${Object.entries(bc).map(([b,c])=>`${b}:${c}`).join(', ')}`);
+    addBoxStatus(box,'warn','⚠ Click Save Price Bands');
+    window._pendingBands=mapped; document.getElementById('bandUploadBtn').disabled=false;
+  },error:e=>addBoxStatus(box,'err','Parse error: '+e.message)});
+}
+
+async function uploadBandList() {
+  const rows=window._pendingBands; if(!rows?.length) return;
+  const box=document.getElementById('bandStatusBox');
+  document.getElementById('bandUploadBtn').disabled=true;
+  addBoxStatus(box,'info','⏳ Clearing...');
+  await sb.from(BAND_TABLE).delete().neq('ticker','__NONE__');
+  addBoxStatus(box,'info',`⏳ Inserting ${rows.length}...`);
+  const BATCH=500;
+  for(let i=0;i<rows.length;i+=BATCH){
+    const {error}=await sb.from(BAND_TABLE).upsert(rows.slice(i,i+BATCH),{onConflict:'ticker,series'});
+    if(error){addBoxStatus(box,'err','✗ '+error.message);return;}
+  }
+  addBoxStatus(box,'ok',`✓ Saved ${rows.length} bands`);
+  showToast(`✓ Price bands updated`,'success');
+  window._pendingBands=null; sessionStorage.removeItem('priceBands');
+  circuitData=null; await loadPriceBands(true);
+}
+
+// ─── KITE FETCH ───────────────────────────────────────────────────────────────
+async function startKiteFetch() {
+  const apiKey=document.getElementById('kiteApiKey').value.trim();
+  const token=document.getElementById('kiteAccessToken').value.trim();
+  const from=document.getElementById('kiteFrom').value;
+  const to=document.getElementById('kiteTo').value;
+  if(!apiKey||!token){showToast('Enter API key and access token','error');return;}
+  if(!from||!to){showToast('Enter from and to dates','error');return;}
+
+  const box=document.getElementById('kiteStatusBox');
+  box.innerHTML=''; box.classList.add('show');
+  const prog=document.getElementById('kiteProgress'); prog.classList.add('show');
+  document.getElementById('kiteFetchBtn').disabled=true;
+
+  // ── Build ticker list from MTF or all EQ stocks ──
+  let allTickers=[...mtfTickers];
+  if(!allTickers.length){
+    addBoxStatus(box,'warn','⚠ No MTF list — fetching all NSE EQ (slower)');
+    // Fallback: let Edge Function fetch all
+    allTickers=[];
+  }
+
+  const BATCH_SIZE=50; // 50 stocks × 400ms ≈ 20s per batch — well under 150s timeout
+  const batches=allTickers.length>0?Math.ceil(allTickers.length/BATCH_SIZE):1;
+  const totalTickers=allTickers.length||'all';
+
+  addBoxStatus(box,'info',`Fetching ${from} → ${to}`);
+  addBoxStatus(box,'info',`${totalTickers} tickers in ${batches} batch(es) of ${BATCH_SIZE}`);
+
+  let totalInserted=0, totalSkipped=0, totalErrors=0;
+  const allErrorSamples=[];
+
+  for(let b=0; b<batches; b++){
+    const batchTickers=allTickers.length>0
+      ? allTickers.slice(b*BATCH_SIZE, (b+1)*BATCH_SIZE)
+      : []; // empty array = Edge Function fetches all
+
+    const batchNum=b+1;
+    document.getElementById('kiteProgressText').textContent=`⏳ Batch ${batchNum}/${batches}`;
+    const pct=Math.round((b/batches)*100);
+    document.getElementById('kiteProgBar').style.width=pct+'%';
+    const estMin=Math.round(((batches-batchNum)*25)/60);
+    document.getElementById('kiteProgressSub').textContent=
+      `${batchNum}/${batches} batches · ~${estMin>0?estMin+' min left':'finishing up'}`;
+
+    try {
+      const res=await fetch(EDGE_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          password:await getPasswordForEdge(),
+          api_key:apiKey,
+          access_token:token,
+          from_date:from,
+          to_date:to,
+          tickers:batchTickers
+        })
+      });
+
+      const text=await res.text();
+      let data;
+      try { data=JSON.parse(text); } catch(_){ data=null; }
+
+      if(!res.ok){
+        const errMsg=data?.error||data?.message||text?.substring(0,200)||('HTTP '+res.status);
+        addBoxStatus(box,'err',`✗ Batch ${batchNum} failed: ${errMsg}`);
+        addBoxStatus(box,'err',`✗ Status: ${res.status} ${res.statusText}`);
+        // Stop on first batch failure — likely auth/network issue
+        document.getElementById('kiteProgressText').textContent='✗ Failed at batch '+batchNum;
+        document.getElementById('kiteProgBar').style.width='0%';
+        document.getElementById('kiteFetchBtn').disabled=false;
+        return;
+      }
+
+      if(data?.error){
+        addBoxStatus(box,'err',`✗ Batch ${batchNum}: ${data.error}`);
+        document.getElementById('kiteProgressText').textContent='✗ Failed at batch '+batchNum;
+        document.getElementById('kiteProgBar').style.width='0%';
+        document.getElementById('kiteFetchBtn').disabled=false;
+        return;
+      }
+
+      if(!data?.summary){
+        addBoxStatus(box,'err',`✗ Batch ${batchNum}: Unexpected response - Edge Function may not be deployed`);
+        addBoxStatus(box,'warn','Response: '+(text||'').substring(0,300));
+        document.getElementById('kiteProgressText').textContent='✗ Failed';
+        document.getElementById('kiteProgBar').style.width='0%';
+        document.getElementById('kiteFetchBtn').disabled=false;
+        return;
+      }
+
+      const s=data.summary;
+      totalInserted+=s.rows_inserted;
+      totalSkipped+=s.symbols_skipped;
+      totalErrors+=s.errors;
+      if(s.error_samples?.length) allErrorSamples.push(...s.error_samples);
+
+      addBoxStatus(box,'ok',`Batch ${batchNum}/${batches}: ${s.rows_inserted} rows, ${s.symbols_skipped} skipped, ${s.errors} errors (${s.symbols_attempted} stocks)`);
+      if(s.error_samples?.length) s.error_samples.slice(0,3).forEach(e=>addBoxStatus(box,'warn','  ⚠ '+e));
+
+    } catch(e) {
+      addBoxStatus(box,'err',`✗ Batch ${batchNum} network error: ${e.message}`);
+      document.getElementById('kiteProgressText').textContent='✗ Error at batch '+batchNum;
+      document.getElementById('kiteFetchBtn').disabled=false;
+      return;
+    }
+  }
+
+  // ── Final summary ──
+  document.getElementById('kiteProgBar').style.width='100%';
+  document.getElementById('kiteProgressText').textContent='✓ Complete!';
+  document.getElementById('kiteProgressSub').textContent='';
+  addBoxStatus(box,'ok',`✓ Total rows inserted: ${totalInserted}`);
+  addBoxStatus(box,'info',`  Skipped: ${totalSkipped}, Errors: ${totalErrors}`);
+  if(allErrorSamples.length) allErrorSamples.slice(0,20).forEach(e=>addBoxStatus(box,'warn','  ⚠ '+e));
+  showToast(`✓ Kite fetch done: ${totalInserted} rows across ${batches} batches`,'success');
+  circuitData=null; await loadData();
+  document.getElementById('kiteFetchBtn').disabled=false;
+}
+
+// We need the raw password for Edge Function — ask user to re-enter
+// Actually we store the hash only. For Edge Function we need to pass the actual password.
+// Solution: store it temporarily in memory during session after unlock
+let _kiteRawPw='';
+async function kiteUnlockWithPw() {
+  // Override: store raw password temporarily
+  const pw=document.getElementById('kitePwInput').value;
+  const h=await sha256(pw);
+  if(h===PW_HASH){
+    _kiteRawPw=pw; // kept in memory only, gone on page refresh
+    document.getElementById('kiteLockScreen').style.display='none';
+    document.getElementById('kiteForm').style.display='block';
+    document.getElementById('kitePwError').style.display='none';
+    document.getElementById('kitePwInput').value='';
+  } else {
+    document.getElementById('kitePwError').style.display='block';
+    document.getElementById('kitePwInput').value='';
+  }
+}
+// Re-wire kiteUnlock to store password
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelector('#kiteLockScreen button.btn-primary').onclick=kiteUnlockWithPw;
+  document.querySelector('#kiteLockScreen input').onkeydown=e=>{if(e.key==='Enter')kiteUnlockWithPw();};
+});
+async function getPasswordForEdge(){return _kiteRawPw;}
+
+// ─── CIRCUIT ──────────────────────────────────────────────────────────────────
+async function loadCircuitData() {
+  document.getElementById('circuitLoading').style.display='block';
+  ['ucRows','lcRows','bandRows','summaryRows'].forEach(id=>{
+    document.getElementById(id).innerHTML='<div style="color:var(--text3);font-size:12px">Loading...</div>';
+  });
+  const PAGE=1000; let all=[],page=0;
+  while(true){
+    const {data,error}=await sb.from(TABLE).select('trade_date,ticker,series,high,low,close,prev_close,volume').eq('series','EQ').order('trade_date',{ascending:false}).range(page*PAGE,(page+1)*PAGE-1);
+    if(error||!data?.length) break; all=all.concat(data); if(data.length<PAGE) break; page++;
+  }
+  document.getElementById('circuitLoading').style.display='none';
+  if(!all.length){['ucRows','lcRows','bandRows','summaryRows'].forEach(id=>{document.getElementById(id).innerHTML='<div style="color:var(--text3);font-size:12px">No data</div>';});return;}
+  const scope=document.getElementById('circuitScope').value;
+  circuitData=computeCircuits(all,scope);
+  renderCircuit();
+}
+
+function isUC(row){
+  if(!row.close||!row.high||!row.prev_close) return false;
+  const band=priceBands[row.ticker];
+  if(band&&band!=='No Band'){const pct=parseFloat(band)/100;return Math.abs(row.close-row.prev_close*(1+pct))/row.prev_close<0.005;}
+  return Math.abs(row.close-row.high)<0.01;
+}
+function isLC(row){
+  if(!row.close||!row.low||!row.prev_close) return false;
+  const band=priceBands[row.ticker];
+  if(band&&band!=='No Band'){const pct=parseFloat(band)/100;return Math.abs(row.close-row.prev_close*(1-pct))/row.prev_close<0.005;}
+  return Math.abs(row.close-row.low)<0.01;
+}
+
+function computeCircuits(all,scope){
+  const data=scope==='mtf'&&mtfTickers.size?all.filter(r=>mtfTickers.has(r.ticker)):all;
+  const dates=[...new Set(data.map(r=>r.trade_date))].sort((a,b)=>b.localeCompare(a));
+  const byTicker={};
+  data.forEach(r=>{if(!byTicker[r.ticker])byTicker[r.ticker]={};byTicker[r.ticker][r.trade_date]={uc:isUC(r),lc:isLC(r),row:r};});
+  const ucStreaks={},lcStreaks={};
+  Object.entries(byTicker).forEach(([t,dm])=>{
+    let us=0,ls=0;
+    for(const d of dates){if(!dm[d]) break;if(dm[d].uc)us++;else break;}
+    for(const d of dates){if(!dm[d]) break;if(dm[d].lc)ls++;else break;}
+    if(us>0)ucStreaks[t]=us;if(ls>0)lcStreaks[t]=ls;
+  });
+  const bkt=s=>s>=4?'4+':String(s);
+  const ucB={'1':[],'2':[],'3':[],'4+':[]},lcB={'1':[],'2':[],'3':[],'4+':[]};
+  Object.entries(ucStreaks).forEach(([t,s])=>{const b=bkt(s);if(ucB[b])ucB[b].push({ticker:t,streak:s});});
+  Object.entries(lcStreaks).forEach(([t,s])=>{const b=bkt(s);if(lcB[b])lcB[b].push({ticker:t,streak:s});});
+  const ld=dates[0];
+  let lUC=0,lLC=0,lAdv=0,lDec=0;
+  data.filter(r=>r.trade_date===ld).forEach(r=>{
+    if(isUC(r))lUC++;else if(isLC(r))lLC++;
+    if(r.close>r.prev_close)lAdv++;else if(r.close<r.prev_close)lDec++;
+  });
+  const bandDist={};
+  [...new Set(data.map(r=>r.ticker))].forEach(t=>{const b=priceBands[t]||'Unknown';bandDist[b]=(bandDist[b]||0)+1;});
+  return{ucBuckets:ucB,lcBuckets:lcB,dates,latestDate:ld,latestUC:lUC,latestLC:lLC,latestAdv:lAdv,latestDec:lDec,bandDist,byTicker,data};
+}
+
+function renderCircuit(){
+  if(!circuitData){loadCircuitData();return;}
+  const{ucBuckets,lcBuckets,latestDate,latestUC,latestLC,latestAdv,latestDec,bandDist}=circuitData;
+  const fd=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'—';
+  let uh=''; [['1 Day','1'],['2 Days','2'],['3 Days','3'],['4+ Days','4+']].forEach(([l,k])=>{const c=ucBuckets[k]?.length||0;uh+=`<div class="circuit-row"><span class="circuit-row-label">${l}</span><span class="circuit-count uc ${c?'':'zero'}" onclick="${c?`showCircuitStocks('uc','${k}')`:''}">${c||'—'}</span></div>`;});
+  document.getElementById('ucRows').innerHTML=uh;
+  let lh=''; [['1 Day','1'],['2 Days','2'],['3 Days','3'],['4+ Days','4+']].forEach(([l,k])=>{const c=lcBuckets[k]?.length||0;lh+=`<div class="circuit-row"><span class="circuit-row-label">${l}</span><span class="circuit-count lc ${c?'':'zero'}" onclick="${c?`showCircuitStocks('lc','${k}')`:''}">${c||'—'}</span></div>`;});
+  document.getElementById('lcRows').innerHTML=lh;
+  let bh=''; ['2','5','10','20','No Band','Unknown'].forEach(b=>{const c=bandDist[b]||0;if(!c)return;bh+=`<div class="circuit-row"><span class="circuit-row-label">${b==='No Band'?'No Band (F&O)':b+'% Band'}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">${c}</span></div>`;});
+  document.getElementById('bandRows').innerHTML=bh||'<div style="color:var(--text3);font-size:12px">No band data</div>';
+  document.getElementById('summaryRows').innerHTML=`
+    <div class="circuit-row"><span class="circuit-row-label">Date</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent)">${fd(latestDate)}</span></div>
+    <div class="circuit-row"><span class="circuit-row-label">Upper Circuit</span><span class="circuit-count uc">${latestUC||'—'}</span></div>
+    <div class="circuit-row"><span class="circuit-row-label">Lower Circuit</span><span class="circuit-count lc">${latestLC||'—'}</span></div>
+    <div class="circuit-row"><span class="circuit-row-label">Advancers</span><span style="color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">${latestAdv||'—'}</span></div>
+    <div class="circuit-row"><span class="circuit-row-label">Decliners</span><span style="color:var(--red);font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">${latestDec||'—'}</span></div>`;
+}
+
+function showCircuitStocks(type,bucket){
+  if(!circuitData) return;
+  const stocks=(type==='uc'?circuitData.ucBuckets:circuitData.lcBuckets)[bucket]||[];
+  if(!stocks.length) return;
+  const label=(type==='uc'?'🟢 Upper':'🔴 Lower')+' Circuit — '+bucket+' Day'+(bucket==='1'?'':'s');
+  document.getElementById('circuitTableTitle').textContent=label;
+  document.getElementById('circuitTableSection').style.display='block';
+  const dates=circuitData.dates;
+  // compute 5-day avg volume for spike detection
+  currentCircuitRows=stocks.map(s=>{
+    const dm=circuitData.byTicker[s.ticker]||{};
+    const r=dm[dates[0]]?.row||{};
+    const vols=dates.slice(0,5).map(d=>dm[d]?.row?.volume||0).filter(v=>v>0);
+    const avgVol=vols.length?vols.reduce((a,b)=>a+b,0)/vols.length:0;
+    const spike=avgVol>0&&r.volume>avgVol*2;
+    const chg=r.prev_close?((r.close-r.prev_close)/r.prev_close*100).toFixed(2):null;
+    return{ticker:s.ticker,band:priceBands[s.ticker]||'—',streak:s.streak,close:r.close,chgPct:chg,volume:r.volume,avgVol,spike};
+  }).sort((a,b)=>(b.spike?1:0)-(a.spike?1:0));
+  let html='<div class="table-wrap"><table><thead><tr><th style="text-align:left">Stock</th><th>Band</th><th>Streak</th><th>Close</th><th>Chg%</th><th>Volume</th><th>Vol vs 5d Avg</th></tr></thead><tbody>';
+  currentCircuitRows.forEach(r=>{
+    const chgCls=r.chgPct>0?'pct-pos':r.chgPct<0?'pct-neg':'pct-zero';
+    const volStr=fmtVol(r.volume);
+    const spikeStr=r.avgVol>0?`${(r.volume/r.avgVol).toFixed(1)}x ${r.spike?'🔥':''}`:'—';
+    html+=`<tr><td>${r.ticker}</td><td>${r.band}</td><td style="color:var(--accent);font-weight:600">${r.streak}d</td><td>${r.close?r.close.toFixed(2):'—'}</td><td><span class="${chgCls}">${r.chgPct!==null?(r.chgPct>0?'+':'')+r.chgPct+'%':'—'}</span></td><td>${volStr}</td><td>${spikeStr}</td></tr>`;
+  });
+  html+='</tbody></table></div>';
+  document.getElementById('circuitTableContainer').innerHTML=html;
+  document.getElementById('circuitTableSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function closeCircuitTable(){document.getElementById('circuitTableSection').style.display='none';currentCircuitRows=[];}
+function exportCircuitCSV(){
+  if(!currentCircuitRows.length) return;
+  let csv='Stock,Band,Streak,Close,ChangePct,Volume,VolVs5dAvg\n';
+  currentCircuitRows.forEach(r=>{csv+=`${r.ticker},${r.band},${r.streak},${r.close||''},${r.chgPct||''},${r.volume||''},${r.avgVol>0?(r.volume/r.avgVol).toFixed(1)+'x':''}\n`;});
+  const t=document.getElementById('circuitTableTitle').textContent.replace(/[^a-z0-9]/gi,'_');
+  triggerDownload(csv,`circuit_${t}_${new Date().toISOString().slice(0,10)}.csv`);
+  showToast('✓ CSV exported','success');
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(name,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  el.classList.add('active');
+  if(name==='history') loadHistory();
+  if(name==='circuit'&&!circuitData) loadCircuitData();
+}
+
+// ─── DRAG DROP ────────────────────────────────────────────────────────────────
+function setupDragDrop(){
+  const area=document.getElementById('uploadArea');
+  area.addEventListener('dragover',e=>{e.preventDefault();area.classList.add('drag-over');});
+  area.addEventListener('dragleave',()=>area.classList.remove('drag-over'));
+  area.addEventListener('drop',e=>{e.preventDefault();area.classList.remove('drag-over');const files=e.dataTransfer.files;if(files.length)handleBulkFiles(files);});
+}
+function setupAuxDragDrop(id,handler){
+  const a=document.getElementById(id); if(!a) return;
+  a.addEventListener('dragover',e=>{e.preventDefault();a.classList.add('drag-over');});
+  a.addEventListener('dragleave',()=>a.classList.remove('drag-over'));
+  a.addEventListener('drop',e=>{e.preventDefault();a.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)handler(f);});
+}
+
+// ─── BHAVCOPY UPLOAD ─────────────────────────────────────────────────────────
+
+// Parse a single CSV file (File object) and return {tradeDate, rows} or throw
+function parseBhavCopyCsv(file){
+  return new Promise((resolve,reject)=>{
+    Papa.parse(file,{header:true,skipEmptyLines:true,
+      complete:result=>{
+        const rows=result.data;
+        const req=['TradDt','TckrSymb','SctySrs','ClsPric','PrvsClsgPric'];
+        const miss=req.filter(c=>!result.meta.fields.includes(c));
+        if(miss.length){reject('Missing columns: '+miss.join(', '));return;}
+        const tradeDate=rows[0]?.TradDt?.substring(0,10);
+        if(!tradeDate||isNaN(Date.parse(tradeDate))){reject('Cannot parse TradDt');return;}
+        const parsed=rows.filter(r=>r.TckrSymb?.trim()&&r.ClsPric).map(r=>({
+          trade_date:tradeDate,ticker:r.TckrSymb?.trim(),series:r.SctySrs?.trim(),
+          open:parseFloat(r.OpnPric)||null,high:parseFloat(r.HghPric)||null,low:parseFloat(r.LwPric)||null,
+          close:parseFloat(r.ClsPric)||null,prev_close:parseFloat(r.PrvsClsgPric)||null,volume:parseInt(r.TtlTradgVol)||null,
+        })).filter(r=>r.ticker&&r.close);
+        resolve({tradeDate,parsed,fileInfo:file.name});
+      },
+      error:e=>reject(e.message)
+    });
+  });
+}
+
+// Extract CSV from a ZIP file and parse it
+async function extractZipAndParse(file){
+  const zip=await JSZip.loadAsync(file);
+  const csvFiles=[];
+  zip.forEach((path,entry)=>{
+    if(!entry.dir && path.toLowerCase().endsWith('.csv')) csvFiles.push(entry);
+  });
+  if(!csvFiles.length) throw 'No CSV found inside ZIP';
+  // Use the first CSV found
+  const csvText=await csvFiles[0].async('string');
+  const blob=new Blob([csvText],{type:'text/csv'});
+  const csvFile=new File([blob],csvFiles[0].name,{type:'text/csv'});
+  return parseBhavCopyCsv(csvFile);
+}
+
+// Handle single file (legacy — CSV only)
+function handleFile(file){
+  if(!file?.name.endsWith('.csv')){showToast('Need .csv or .zip','error');return;}
+  clearStatus(); addStatus('info','📄 '+file.name);
+  Papa.parse(file,{header:true,skipEmptyLines:true,complete:r=>validateAndPrepare(r),error:e=>addStatus('err','✗ '+e.message)});
+}
+
+function validateAndPrepare(result){
+  const rows=result.data;
+  const req=['TradDt','TckrSymb','SctySrs','ClsPric','PrvsClsgPric'];
+  const miss=req.filter(c=>!result.meta.fields.includes(c));
+  if(miss.length){addStatus('err','✗ Missing: '+miss.join(', '));return;}
+  addStatus('ok','✓ Columns validated');
+  const tradeDate=rows[0]?.TradDt?.substring(0,10);
+  if(!tradeDate||isNaN(Date.parse(tradeDate))){addStatus('err','✗ Cannot parse TradDt');return;}
+  addStatus('ok','✓ Trade date: '+tradeDate);
+  const sc={};rows.forEach(r=>{const s=r.SctySrs?.trim()||'?';sc[s]=(sc[s]||0)+1;});
+  addStatus('ok','✓ Series: '+Object.entries(sc).sort((a,b)=>b[1]-a[1]).map(([s,c])=>s+':'+c).join(' | '));
+  parsedRows=rows.filter(r=>r.TckrSymb?.trim()&&r.ClsPric).map(r=>({
+    trade_date:tradeDate,ticker:r.TckrSymb?.trim(),series:r.SctySrs?.trim(),
+    open:parseFloat(r.OpnPric)||null,high:parseFloat(r.HghPric)||null,low:parseFloat(r.LwPric)||null,
+    close:parseFloat(r.ClsPric)||null,prev_close:parseFloat(r.PrvsClsgPric)||null,volume:parseInt(r.TtlTradgVol)||null,
+  })).filter(r=>r.ticker&&r.close);
+  addStatus('ok','✓ Ready: '+parsedRows.length+' rows');
+  addStatus('warn','  ⚠ Duplicates auto-skipped');
+  document.getElementById('uploadBtn').disabled=false;
+}
+
+// Handle multiple files (CSV + ZIP mix)
+async function handleBulkFiles(fileList){
+  const files=[...fileList];
+  if(!files.length) return;
+  clearStatus(); showProgress(0);
+
+  // Single CSV file — use existing flow
+  if(files.length===1 && files[0].name.toLowerCase().endsWith('.csv')){
+    addStatus('info','📄 '+files[0].name);
+    Papa.parse(files[0],{header:true,skipEmptyLines:true,complete:r=>validateAndPrepare(r),error:e=>addStatus('err','✗ '+e.message)});
+    return;
+  }
+
+  // Multiple files or ZIP — bulk mode
+  addStatus('info','📄 Processing '+files.length+' file(s)...');
+  document.getElementById('uploadBtn').disabled=true;
+
+  const allRows=[];
+  let fileErrors=0;
+
+  for(let i=0;i<files.length;i++){
+    const file=files[i];
+    const isZip=file.name.toLowerCase().endsWith('.zip');
+    const pct=Math.round((i/files.length)*100);
+    showProgress(pct);
+
+    try {
+      const result=isZip ? await extractZipAndParse(file) : await parseBhavCopyCsv(file);
+      allRows.push(...result.parsed);
+      addStatus('ok','✓ ['+(i+1)+'/'+files.length+'] '+file.name+'  '+result.tradeDate+'  '+result.parsed.length+' rows');
+    } catch(e) {
+      fileErrors++;
+      addStatus('err','✗ ['+(i+1)+'/'+files.length+'] '+file.name+'  '+e);
+    }
+  }
+
+  if(!allRows.length){
+    addStatus('err','✗ No rows to upload');
+    showProgress(0);
+    return;
+  }
+
+  addStatus('ok','✓ Total: '+allRows.length+' rows from '+(files.length-fileErrors)+' file(s)');
+  if(fileErrors) addStatus('warn','  ⚠ '+fileErrors+' file(s) had errors');
+
+  // Upload all rows in batches
+  addStatus('info','⏳ Uploading to Supabase...');
+  const BATCH=500; let done=0;
+  for(let i=0;i<allRows.length;i+=BATCH){
+    const {error}=await sb.from(TABLE).upsert(allRows.slice(i,i+BATCH),{onConflict:'trade_date,ticker,series',ignoreDuplicates:true});
+    if(error){addStatus('err','✗ Upload error: '+error.message);showProgress(0);return;}
+    done+=BATCH; showProgress(Math.min(100,Math.round(done/allRows.length*100)));
+  }
+  showProgress(100);
+  addStatus('ok','✓ Upload complete! '+allRows.length+' rows');
+  showToast('✓ Uploaded '+allRows.length+' rows from '+(files.length-fileErrors)+' file(s)','success');
+  circuitData=null; await Promise.all([loadData(),loadHistory()]);
+}
+
+async function uploadData(){
+  if(!parsedRows.length) return;
+  document.getElementById('uploadBtn').disabled=true;
+  showProgress(0);
+  const BATCH=500; let done=0;
+  for(let i=0;i<parsedRows.length;i+=BATCH){
+    const {error}=await sb.from(TABLE).upsert(parsedRows.slice(i,i+BATCH),{onConflict:'trade_date,ticker,series',ignoreDuplicates:true});
+    if(error){addStatus('err','✗ '+error.message);document.getElementById('uploadBtn').disabled=false;return;}
+    done+=BATCH; showProgress(Math.min(100,Math.round(done/parsedRows.length*100)));
+  }
+  showProgress(100);
+  addStatus('ok','✓ Upload complete! '+parsedRows.length+' rows');
+  showToast('✓ BhavCopy uploaded','success');
+  parsedRows=[]; document.getElementById('uploadBtn').disabled=true;
+  circuitData=null; await Promise.all([loadData(),loadHistory()]);
+}
+
+// ─── LOAD DATA ────────────────────────────────────────────────────────────────
+function onViewChange(){
+  const v=document.getElementById('filterView').value;
+  document.getElementById('watchlistGroup').style.display=v==='watchlist'?'':'none';
+  loadData();
+}
+
+async function loadData(){
+  const from   = document.getElementById('filterFrom')?.value;
+  const to     = document.getElementById('filterTo')?.value;
+  const series = document.getElementById('filterSeries')?.value||'EQ';
+  const view   = document.getElementById('filterView')?.value||'mtf';
+  const wlRaw  = document.getElementById('watchlistInput')?.value||'';
+  const wl     = wlRaw.split(/[\n,]+/).map(s=>s.trim().toUpperCase()).filter(Boolean);
+
+  let tickerFilter=[];
+  if(view==='mtf'){
+    tickerFilter=[...mtfTickers];
+    if(!tickerFilter.length){
+      document.getElementById('tableContainer').innerHTML='<div class="empty-state"><div class="e-icon">📋</div><p>No MTF list uploaded yet. Go to <b>Upload</b> tab.</p></div>';
+      document.getElementById('tableMeta').textContent=''; return;
+    }
+  } else if(view==='watchlist') tickerFilter=wl;
+
+  document.getElementById('tableContainer').innerHTML=`<div id="tableSkeleton">
+    <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div>
+    <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div></div>`;
+
+  // If no date filter, fetch last DEFAULT_DAYS trading days from DB
+  let fromDate=from, toDate=to;
+  if(!fromDate&&!toDate){
+    // get distinct dates first
+    const {data:dts}=await sb.from(TABLE).select('trade_date').eq('series','EQ').order('trade_date',{ascending:false}).limit(DEFAULT_DAYS*10);
+    if(dts?.length){
+      const uniq=[...new Set(dts.map(r=>r.trade_date))].sort((a,b)=>b.localeCompare(a));
+      const last7=uniq.slice(0,DEFAULT_DAYS);
+      if(last7.length){fromDate=last7[last7.length-1];toDate=last7[0];}
+    }
+  }
+
+  const PAGE=1000; let all=[],page=0;
+  const bq=()=>{
+    let q=sb.from(TABLE).select('trade_date,ticker,change_pct,volume').order('trade_date',{ascending:false}).order('ticker');
+    if(series!=='ALL') q=q.eq('series',series);
+    if(fromDate) q=q.gte('trade_date',fromDate);
+    if(toDate)   q=q.lte('trade_date',toDate);
+    if(tickerFilter.length) q=q.in('ticker',tickerFilter);
+    return q;
+  };
+  while(true){
+    const {data,error}=await bq().range(page*PAGE,(page+1)*PAGE-1);
+    if(error){showToast('Load error: '+error.message,'error');return;}
+    if(!data?.length) break; all=all.concat(data); if(data.length<PAGE) break; page++;
+  }
+
+  if(!all.length){
+    document.getElementById('tableContainer').innerHTML='<div class="empty-state"><div class="e-icon">📂</div><p>No data. Upload BhavCopy files first.</p></div>';
+    updateStats([],[],{},{}); return;
+  }
+
+  const dates=[...new Set(all.map(r=>r.trade_date))].sort((a,b)=>b.localeCompare(a));
+  const stocks=[...new Set(all.map(r=>r.ticker))].sort();
+  const grid={},volGrid={};
+  all.forEach(r=>{
+    if(!grid[r.ticker]) grid[r.ticker]={};
+    if(!volGrid[r.ticker]) volGrid[r.ticker]={};
+    grid[r.ticker][r.trade_date]=r.change_pct;
+    volGrid[r.ticker][r.trade_date]=r.volume;
+  });
+  const dwd={}; dates.forEach(d=>{dwd[d]=true;});
+  tableData={dates,stocks,grid,volGrid};
+  renderTable(dates,stocks,grid,volGrid,dwd);
+  updateStats(dates,stocks,grid,volGrid);
+}
+
+// ─── STREAK COMPUTATION ───────────────────────────────────────────────────────
+function computeStreak(ticker,dates,grid){
+  // Consecutive streak from latest day
+  let ucConsec=0,lcConsec=0;
+  for(const d of dates){
+    const v=parseFloat(grid[ticker]?.[d]);
+    const band=priceBands[ticker];
+    const pct=band&&band!=='No Band'?parseFloat(band):null;
+    const uc=pct?v>=(pct-0.1):v>=1.9; // approx hit for % change
+    const lc=pct?v<=(-(pct-0.1)):v<=-1.9;
+    if(ucConsec===0&&lcConsec===0){if(uc)ucConsec=1;else if(lc)lcConsec=1;else break;}
+    else if(ucConsec>0){if(uc)ucConsec++;else break;}
+    else if(lcConsec>0){if(lc)lcConsec++;else break;}
+  }
+  // Window hits within shown dates
+  let ucWin=0,lcWin=0;
+  const band=priceBands[ticker];
+  const pct=band&&band!=='No Band'?parseFloat(band):null;
+  dates.forEach(d=>{
+    const v=parseFloat(grid[ticker]?.[d]);
+    if(isNaN(v)) return;
+    if(pct?v>=(pct-0.1):v>=1.9) ucWin++;
+    else if(pct?v<=(-(pct-0.1)):v<=-1.9) lcWin++;
+  });
+  return{ucConsec,lcConsec,ucWin,lcWin};
+}
+
+function fmtStreak(ucConsec,lcConsec,ucWin,lcWin,totalDates){
+  // Consecutive takes priority
+  if(ucConsec>=2){
+    const label=ucConsec>=4?'4d+↑':`${ucConsec}d↑`;
+    return `<span class="streak streak-uc-c">${label}</span>`;
+  }
+  if(lcConsec>=2){
+    const label=lcConsec>=4?'4d+↓':`${lcConsec}d↓`;
+    return `<span class="streak streak-lc-c">${label}</span>`;
+  }
+  if(ucConsec===1) return `<span class="streak streak-uc-c">1d↑</span>`;
+  if(lcConsec===1) return `<span class="streak streak-lc-c">1d↓</span>`;
+  // Window hits
+  if(ucWin>=3) return `<span class="streak streak-uc-w">2w+↑</span>`;
+  if(ucWin===2) return `<span class="streak streak-uc-w">2w↑</span>`;
+  if(ucWin===1) return `<span class="streak streak-uc-w">1w↑</span>`;
+  if(lcWin>=3)  return `<span class="streak streak-lc-w">2w+↓</span>`;
+  if(lcWin===2) return `<span class="streak streak-lc-w">2w↓</span>`;
+  if(lcWin===1) return `<span class="streak streak-lc-w">1w↓</span>`;
+  return `<span class="streak-none">—</span>`;
+}
+
+// ─── RENDER TABLE ─────────────────────────────────────────────────────────────
+function renderTable(dates,stocks,grid,volGrid,dwd){
+  const fmt=d=>new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+  const fmtPct=(v,isNA)=>{
+    if(isNA) return '<span class="pct-null">NA</span>';
+    if(v===null||v===undefined) return '<span class="pct-null">—</span>';
+    const n=parseFloat(v);
+    const cls=n>0?'pct-pos':n<0?'pct-neg':'pct-zero';
+    return `<span class="${cls}">${n>0?'+':''}${n.toFixed(2)}%</span>`;
+  };
+
+  let html='<div class="table-wrap"><table><thead><tr><th>Stock</th><th>Streak</th>';
+  dates.forEach(d=>html+=`<th>${fmt(d)}</th>`);
+  html+='</tr></thead><tbody>';
+
+  stocks.forEach(t=>{
+    const {ucConsec,lcConsec,ucWin,lcWin}=computeStreak(t,dates,grid);
+    const streakHtml=fmtStreak(ucConsec,lcConsec,ucWin,lcWin,dates.length);
+    html+=`<tr><td>${t}</td><td>${streakHtml}</td>`;
+    dates.forEach(d=>{
+      const v=grid[t]?.[d];
+      const vol=volGrid[t]?.[d];
+      const isNA=v===undefined&&dwd[d];
+      const pctHtml=fmtPct(v,isNA);
+      const volHtml=vol?`<span class="vol-sub">${fmtVol(vol)}</span>`:'';
+      html+=`<td>${pctHtml}${volHtml}</td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  document.getElementById('tableContainer').innerHTML=html;
+  document.getElementById('tableMeta').textContent=`${stocks.length} stocks × ${dates.length} days`;
+}
+
+function updateStats(dates,stocks,grid,volGrid){
+  document.getElementById('statStocks').textContent=stocks.length||'—';
+  document.getElementById('statDays').textContent=dates.length||'—';
+  document.getElementById('statLastDate').textContent=dates[0]?new Date(dates[0]+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'—';
+  if(dates[0]&&stocks.length){
+    let adv=0,dec=0;
+    stocks.forEach(t=>{const v=parseFloat(grid[t]?.[dates[0]]);if(!isNaN(v)){if(v>0)adv++;else if(v<0)dec++;}});
+    document.getElementById('statAdv').textContent=adv||'—';
+    document.getElementById('statDec').textContent=dec||'—';
+  }
+  document.getElementById('statMtf').textContent=mtfTickers.size||'—';
+  document.getElementById('statBands').textContent=Object.keys(priceBands).length||'—';
+}
+
+// ─── HISTORY ──────────────────────────────────────────────────────────────────
+async function loadHistory(){
+  const PAGE=1000; let all=[],page=0;
+  while(true){
+    const {data,error}=await sb.from(TABLE).select('trade_date').order('trade_date',{ascending:false}).range(page*PAGE,(page+1)*PAGE-1);
+    if(error||!data?.length) break; all=all.concat(data); if(data.length<PAGE) break; page++;
+  }
+  if(!all.length){document.getElementById('calendarWrap').innerHTML='<div class="empty-state"><div class="e-icon">📁</div><p>No uploads yet</p></div>';return;}
+  const counts={};
+  all.forEach(r=>{counts[r.trade_date]=(counts[r.trade_date]||0)+1;});
+  _historyCounts=counts; _historyMaxCount=Math.max(...Object.values(counts));
+  const uploaded=Object.keys(counts);
+  const total=uploaded.length;
+  const years=[...new Set(uploaded.map(d=>d.slice(0,4)))].sort((a,b)=>b-a);
+  _historyYears=years;
+  const sel=document.getElementById('calYearSelect');
+  sel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  sel.value=years[0];
+  document.getElementById('historyMeta').textContent=`${total} day${total!==1?'s':''} across ${years.length} year${years.length!==1?'s':''}`;
+  renderCalendarForYear();
+  // Recent list
+  const sorted=uploaded.sort((a,b)=>b.localeCompare(a));
+  let html=`<div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--text2);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase">Recent Uploads</div>`;
+  sorted.slice(0,15).forEach(date=>{
+    const label=new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+    html+=`<div class="upload-history-item"><span class="date">${label}</span><span>${counts[date].toLocaleString()} rows</span><span class="pill">${date}</span></div>`;
+  });
+  if(sorted.length>15) html+=`<div style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);text-align:center;margin-top:8px">+${sorted.length-15} more (see calendar)</div>`;
+  document.getElementById('historyList').innerHTML=html;
+}
+
+function renderCalendarForYear(){
+  const year=parseInt(document.getElementById('calYearSelect')?.value||new Date().getFullYear());
+  renderCalendar(_historyCounts,_historyMaxCount,year);
+}
+
+function renderCalendar(counts,maxCount,year){
+  const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const today=new Date();
+  const toKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const isWE=d=>d.getDay()===0||d.getDay()===6;
+  const cellCls=d=>{
+    if(isWE(d)) return 'cal-day weekend';
+    const k=toKey(d);
+    if(!counts[k]) return 'cal-day no-data';
+    const r=counts[k]/maxCount;
+    if(r<0.33) return 'cal-day uploaded-lo';
+    if(r<0.66) return 'cal-day uploaded-mid';
+    return 'cal-day uploaded-hi';
+  };
+  const tip=d=>{
+    const k=toKey(d);
+    const label=d.toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short'});
+    if(isWE(d)) return `${label} — Weekend`;
+    if(!counts[k]) return `${label} — Not uploaded`;
+    return `${label} — ${counts[k].toLocaleString()} rows`;
+  };
+
+  let html='<div class="cal-year">';
+  for(let m=0;m<12;m++){
+    const dim=new Date(year,m+1,0).getDate();
+    const firstDow=(new Date(year,m,1).getDay()+6)%7; // Mon=0
+    const totalCells=Math.ceil((firstDow+dim)/7)*7;
+    const cells=[];
+    for(let i=0;i<totalCells;i++){
+      const dn=i-firstDow+1;
+      if(dn<1||dn>dim){cells.push(null);continue;}
+      const d=new Date(year,m,dn);
+      cells.push(d>today?null:d);
+    }
+    const nw=totalCells/7;
+    html+=`<div class="cal-month-block">`;
+    html+=`<div class="cal-month-name">${MONTHS[m]}</div>`;
+    html+=`<div style="display:flex;gap:2px">`;
+    // dow labels
+    html+=`<div class="cal-dow-labels">`;
+    ['M','T','W','T','F','S','S'].forEach((l,i)=>{
+      html+=`<div class="cal-dow-label" style="color:${i>=5?'var(--text3)':'var(--text3)'}">${l}</div>`;
+    });
+    html+=`</div>`;
+    // week columns
+    for(let w=0;w<nw;w++){
+      html+=`<div style="display:flex;flex-direction:column;gap:2px">`;
+      for(let row=0;row<7;row++){
+        const d=cells[w*7+row];
+        if(!d){html+=`<div class="cal-day empty"></div>`;}
+        else{html+=`<div class="${cellCls(d)}" title="${tip(d)}"></div>`;}
+      }
+      html+=`</div>`;
+    }
+    html+=`</div></div>`;
+  }
+  html+='</div>';
+  document.getElementById('calendarWrap').innerHTML=html;
+}
+
+// ─── EXPORT ───────────────────────────────────────────────────────────────────
+async function exportCSV(mode='all'){
+  showToast('⏳ Preparing...','success');
+  const series=document.getElementById('filterSeries')?.value||'EQ';
+  const from=document.getElementById('filterFrom')?.value;
+  const to=document.getElementById('filterTo')?.value;
+  let tf=[];
+  if(mode==='mtf'){tf=[...mtfTickers];if(!tf.length){showToast('No MTF list','warn');return;}}
+  const PAGE=1000; let all=[],page=0;
+  while(true){
+    let q=sb.from(TABLE).select('trade_date,ticker,change_pct').order('trade_date',{ascending:false}).order('ticker').range(page*PAGE,(page+1)*PAGE-1);
+    if(series!=='ALL') q=q.eq('series',series);
+    if(from) q=q.gte('trade_date',from);
+    if(to)   q=q.lte('trade_date',to);
+    if(tf.length) q=q.in('ticker',tf);
+    const {data,error}=await q; if(error||!data?.length) break; all=all.concat(data); if(data.length<PAGE) break; page++;
+  }
+  if(!all.length){showToast('No data','warn');return;}
+  const dates=[...new Set(all.map(r=>r.trade_date))].sort((a,b)=>b.localeCompare(a));
+  const stocks=[...new Set(all.map(r=>r.ticker))].sort();
+  const g={};all.forEach(r=>{if(!g[r.ticker])g[r.ticker]={};g[r.ticker][r.trade_date]=r.change_pct;});
+  let csv='Stock,'+dates.join(',')+'\n';
+  stocks.forEach(t=>{csv+=t+','+dates.map(d=>{const v=g[t]?.[d];return v!=null?parseFloat(v).toFixed(2):'NA';}).join(',')+'\n';});
+  const label=mode==='mtf'?'mtf':'full';
+  const suf=(from&&to)?`${from}_to_${to}`:dates[dates.length-1]+'_to_'+dates[0];
+  triggerDownload(csv,`bhav_pct_${label}_${suf}.csv`);
+  showToast(`✓ ${label.toUpperCase()} CSV (${stocks.length}×${dates.length})`,'success');
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function fmtDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function fmtVol(v){
+  if(!v||v<=0) return '';
+  if(v>=10000000) return (v/10000000).toFixed(1)+'Cr';
+  if(v>=100000)   return (v/100000).toFixed(1)+'L';
+  if(v>=1000)     return (v/1000).toFixed(1)+'K';
+  return String(v);
+}
+function clearFilters(){
+  ['filterFrom','filterTo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('filterSeries').value='EQ';
+  document.getElementById('watchlistInput').value='';
+  loadData();
+}
+function clearUpload(){
+  parsedRows=[];
+  document.getElementById('csvFile').value='';
+  document.getElementById('uploadBtn').disabled=true;
+  clearStatus();showProgress(0);
+  document.getElementById('progressWrap').classList.remove('show');
+}
+function clearStatus(){const b=document.getElementById('statusBox');b.innerHTML='';b.classList.remove('show');}
+function addStatus(type,msg){
+  const b=document.getElementById('statusBox');b.classList.add('show');
+  const l=document.createElement('div');l.className='status-line '+type;l.textContent=msg;b.appendChild(l);b.scrollTop=b.scrollHeight;
+}
+function addBoxStatus(box,type,msg){
+  box.classList.add('show');
+  const l=document.createElement('div');l.className='status-line '+type;l.textContent=msg;box.appendChild(l);
+}
+function showProgress(pct){
+  const w=document.getElementById('progressWrap'),b=document.getElementById('progressBar');
+  pct>0?w.classList.add('show'):w.classList.remove('show');b.style.width=pct+'%';
+}
+function triggerDownload(csv,fn){
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=fn;a.click();
+}
+let toastTimer;
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');t.textContent=msg;t.className='show '+type;
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.className='';},3500);
+}
+</script>
+</body>
+</html>
