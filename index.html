@@ -19,6 +19,8 @@
   --grid-line:rgba(0,212,170,.03);
   --shadow:rgba(0,0,0,.4);
   --th-bg:#1a2235; --td-sticky:#111827;
+  --scrollbar-thumb: #1e2d45;
+  --scrollbar-track: #0a0e1a;
 }
 /* ── LIGHT THEME ── */
 [data-theme="light"] {
@@ -29,12 +31,30 @@
   --grid-line:rgba(0,120,80,.04);
   --shadow:rgba(0,0,0,.12);
   --th-bg:#e8edf5; --td-sticky:#ffffff;
+  --scrollbar-thumb: #d0dae8;
+  --scrollbar-track: #f0f4f8;
 }
 
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s;}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
 .app{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 24px 60px;}
+
+/* ── CUSTOM THEMED SCROLLBARS ── */
+.table-wrap::-webkit-scrollbar, .status-box::-webkit-scrollbar, .cal-year::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.table-wrap::-webkit-scrollbar-track, .status-box::-webkit-scrollbar-track, .cal-year::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+.table-wrap::-webkit-scrollbar-thumb, .status-box::-webkit-scrollbar-thumb, .cal-year::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+.table-wrap::-webkit-scrollbar-thumb:hover, .status-box::-webkit-scrollbar-thumb:hover, .cal-year::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
 
 /* HEADER */
 header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 28px;border-bottom:1px solid var(--border);margin-bottom:28px;flex-wrap:wrap;gap:12px;}
@@ -49,8 +69,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:20p
 .theme-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
 .theme-btn:hover{border-color:var(--accent);color:var(--accent);}
 
-/* TABS */
-.tabs{display:flex;gap:2px;margin-bottom:24px;border-bottom:1px solid var(--border);overflow-x:auto;}
+/* TABS - Removed unexpected scroll layout properties */
+.tabs{display:flex;gap:2px;margin-bottom:24px;border-bottom:1px solid var(--border);overflow-x:hidden;}
 .tab{padding:9px 18px;font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--text2);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;letter-spacing:.5px;white-space:nowrap;}
 .tab:hover{color:var(--text);}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
@@ -187,9 +207,6 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
 
 /* CALENDAR */
 .cal-year{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;justify-content:flex-start;}
-.cal-year::-webkit-scrollbar{height:4px;}
-.cal-year::-webkit-scrollbar-track{background:var(--surface2);border-radius:2px;}
-.cal-year::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 .cal-month-block{display:flex;flex-direction:column;align-items:flex-start;gap:5px;flex-shrink:0;}
 .cal-month-name{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--text2);letter-spacing:1px;text-transform:uppercase;padding-left:18px;}
 .cal-day{width:13px;height:13px;border-radius:2px;cursor:default;transition:transform .1s;flex-shrink:0;}
@@ -240,7 +257,6 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
   <button class="tab" onclick="switchTab('history',this)">📁 History</button>
 </div>
 
-<!-- DASHBOARD -->
 <div class="panel active" id="panel-view">
   <div class="stats-row" id="statsRow">
     <div class="stat-card"><div class="stat-label">Stocks</div><div class="stat-value" id="statStocks">—</div></div>
@@ -306,7 +322,6 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
   </div>
 </div>
 
-<!-- CIRCUIT -->
 <div class="panel" id="panel-circuit">
   <div class="circuit-header">
     <div class="circuit-title">⚡ Circuit Analytics</div>
@@ -341,7 +356,6 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
   </div>
 </div>
 
-<!-- UPLOAD -->
 <div class="panel" id="panel-upload">
   <div id="lockScreen">
     <div class="card">
@@ -359,7 +373,6 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
   </div>
 
   <div id="uploadForm" style="display:none">
-    <!-- BhavCopy -->
     <div class="card">
       <div class="card-title">Upload BhavCopy CSV</div>
       <div class="upload-area" id="uploadArea">
@@ -376,7 +389,6 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
         <button class="btn btn-danger" onclick="lock()" style="margin-left:auto">🔒 Lock</button>
       </div>
     </div>
-    <!-- MTF -->
     <div class="card">
       <div class="card-title">MTF Approved Securities</div>
       <p style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.7">
@@ -395,7 +407,6 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
         <span id="mtfCurrentCount" style="font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace"></span>
       </div>
     </div>
-    <!-- Price Band -->
     <div class="card">
       <div class="card-title">Price Band / Circuit List</div>
       <p style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.7">
@@ -416,7 +427,6 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
   </div>
 </div>
 
-<!-- KITE FETCH -->
 <div class="panel" id="panel-kite">
   <div id="kiteLockScreen">
     <div class="card">
@@ -483,7 +493,6 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
   </div>
 </div>
 
-<!-- HISTORY -->
 <div class="panel" id="panel-history">
   <div class="card">
     <div class="card-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -509,8 +518,7 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
   </div>
 </div>
 
-</div><!-- /app -->
-<div id="toast"></div>
+</div><div id="toast"></div>
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
@@ -535,8 +543,6 @@ let currentCircuitRows= [];
 let _historyCounts    = {}, _historyMaxCount=1, _historyYears=[];
 
 // ─── UNIFIED CIRCUIT DETECTION ────────────────────────────────────────────────
-// Band tolerance table: for each % band, what change_pct threshold counts as UC/LC
-// Handles cases like 4.99% being counted as 5% circuit
 const BAND_TOLERANCE = {
   '2':  { uc: 1.80, lc: -1.80 },
   '5':  { uc: 4.70, lc: -4.70 },
@@ -544,22 +550,17 @@ const BAND_TOLERANCE = {
   '20': { uc: 19.0, lc: -19.0 },
 };
 
-// Works with either OHLC row (from DB) or a plain change_pct number
-// row must have: close, high, low, prev_close  OR  change_pct
 function isUC(row) {
   const band = priceBands[row.ticker];
-  // No Band = F&O stocks, no circuit
   if (band === 'No Band') return false;
   const tol = band && BAND_TOLERANCE[band];
   if (tol) {
-    // Use change_pct if available (fast path), otherwise compute from OHLC
     const chg = row.change_pct != null
       ? parseFloat(row.change_pct)
       : (row.prev_close ? (row.close - row.prev_close) / row.prev_close * 100 : null);
     if (chg == null) return false;
     return chg >= tol.uc;
   }
-  // Unknown band — fallback: close ≈ high (within 0.1%)
   if (!row.close || !row.high) return false;
   return Math.abs(row.close - row.high) / row.high < 0.001;
 }
@@ -750,7 +751,7 @@ function handleBandFile(file) {
       return{ticker:(r[symCol]||'').trim().toUpperCase(),series:serCol?(r[serCol]||'').trim():null,band:b,remarks:remCol?(r[remCol]||'').trim():null,upload_date:new Date().toISOString().slice(0,10)};
     }).filter(r=>r.ticker);
     addBoxStatus(box,'ok',`✓ ${mapped.length} rows: ${Object.entries(bc).map(([b,c])=>`${b}:${c}`).join(', ')}`);
-    addBoxStatus(box,'warn','⚠ Click Save Price Bands');
+    addBoxStatus(box['warn'],'⚠ Click Save Price Bands');
     window._pendingBands=mapped; document.getElementById('bandUploadBtn').disabled=false;
   },error:e=>addBoxStatus(box,'err','Parse error: '+e.message)});
 }
@@ -902,7 +903,6 @@ async function loadCircuitData() {
     document.getElementById(id).innerHTML='<div style="color:var(--text3);font-size:12px">Loading...</div>';
   });
 
-  // Fetch all EQ data (no ticker filter — handled in JS)
   const PAGE=1000; let all=[],page=0;
   while(true){
     const {data,error}=await sb.from(TABLE)
@@ -935,7 +935,6 @@ function computeCircuits(all, scope){
 
   const dates = [...new Set(data.map(r=>r.trade_date))].sort((a,b)=>b.localeCompare(a));
 
-  // Build per-ticker per-date map
   const byTicker = {};
   data.forEach(r => {
     if(!byTicker[r.ticker]) byTicker[r.ticker] = {};
@@ -944,7 +943,6 @@ function computeCircuits(all, scope){
     };
   });
 
-  // Compute consecutive streaks from latest date
   const ucStreaks={}, lcStreaks={};
   Object.entries(byTicker).forEach(([t,dm])=>{
     let us=0, ls=0;
@@ -1258,9 +1256,7 @@ async function uploadData(){
   circuitData=null; await Promise.all([loadData(),loadHistory()]);
 }
 
-// ─── LOAD DATA ────────────────────────────────────────────────────────────────
-// FIX: fetch ALL data for date range, filter by ticker in JS
-// This avoids the Supabase URL length limit with large IN clauses (1500+ tickers)
+// ─── LOAD DATA (FIXED: 7-DAY DEFAULT AND OPTIMIZED LOAD SPEED) ────────────────
 function onViewChange(){
   const v=document.getElementById('filterView').value;
   document.getElementById('watchlistGroup').style.display=v==='watchlist'?'':'none';
@@ -1275,7 +1271,6 @@ async function loadData(){
   const wlRaw  = document.getElementById('watchlistInput')?.value||'';
   const wl     = wlRaw.split(/[\n,]+/).map(s=>s.trim().toUpperCase()).filter(Boolean);
 
-  // Resolve watchlist ISINs → tickers
   let watchlistTickers = new Set();
   if(view==='watchlist'){
     wl.forEach(s=>{
@@ -1284,7 +1279,6 @@ async function loadData(){
     });
   }
 
-  // MTF view requires mtf list
   if(view==='mtf' && !mtfTickers.size){
     document.getElementById('tableContainer').innerHTML='<div class="empty-state"><div class="e-icon">📋</div><p>No MTF list uploaded yet. Go to <b>Upload</b> tab.</p></div>';
     document.getElementById('tableMeta').textContent=''; return;
@@ -1294,32 +1288,51 @@ async function loadData(){
     <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div>
     <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div></div>`;
 
-  // Determine date range — if none set, auto-pick last DEFAULT_DAYS trading days
   let fromDate=from, toDate=to;
+
+  // FIX: Properly extract the last 7 distinct trade dates rather than using arbitrary row count limits
   if(!fromDate && !toDate){
-    const {data:dts} = await sb.from(TABLE)
-      .select('trade_date')
-      .eq('series', series==='ALL'?'EQ':series)
-      .order('trade_date',{ascending:false})
-      .limit(DEFAULT_DAYS * 10);
-    if(dts?.length){
-      const uniq=[...new Set(dts.map(r=>r.trade_date))].sort((a,b)=>b.localeCompare(a));
-      const last=uniq.slice(0, DEFAULT_DAYS);
-      if(last.length){ fromDate=last[last.length-1]; toDate=last[0]; }
+    const {data: distinctDates, error: dateError} = await sb.rpc('get_distinct_dates', { 
+      series_param: series === 'ALL' ? 'EQ' : series, 
+      limit_param: DEFAULT_DAYS 
+    });
+
+    if(!dateError && distinctDates && distinctDates.length) {
+      const sortedDates = distinctDates.map(d => d.trade_date).sort((a,b)=>b.localeCompare(a));
+      toDate = sortedDates[0];
+      fromDate = sortedDates[sortedDates.length - 1];
+    } else {
+      // Fallback inside JavaScript if RPC routine hasn't been compiled/deployed to Supabase dashboard yet
+      const {data:dts} = await sb.from(TABLE)
+        .select('trade_date')
+        .eq('series', series==='ALL'?'EQ':series)
+        .order('trade_date',{ascending:false})
+        .limit(4000); 
+      if(dts?.length){
+        const uniq=[...new Set(dts.map(r=>r.trade_date))].sort((a,b)=>b.localeCompare(a));
+        const last=uniq.slice(0, DEFAULT_DAYS);
+        if(last.length){ fromDate=last[last.length-1]; toDate=last[0]; }
+      }
     }
   }
 
-  // Fetch ALL rows for this date range and series (no ticker filter in query)
-  // Then filter by view in JS — avoids URL length limit
-  const PAGE=1000; let all=[],page=0;
+  // OPTIMIZATION: Filter payload query parameters at the database layer if 'mtf' or 'watchlist' views are scoped
+  let all=[], page=0, PAGE=2000;
   while(true){
     let q = sb.from(TABLE)
       .select('trade_date,ticker,close,high,low,prev_close,change_pct,volume')
-      .order('trade_date',{ascending:false})
-      .order('ticker');
+      .order('trade_date',{ascending:false});
+    
     if(series!=='ALL') q=q.eq('series',series);
     if(fromDate) q=q.gte('trade_date',fromDate);
     if(toDate)   q=q.lte('trade_date',toDate);
+    
+    if(view==='mtf' && mtfTickers.size < 200) {
+      q = q.in('ticker', [...mtfTickers]);
+    } else if(view==='watchlist' && watchlistTickers.size > 0) {
+      q = q.in('ticker', [...watchlistTickers]);
+    }
+    
     q=q.range(page*PAGE,(page+1)*PAGE-1);
     const {data,error}=await q;
     if(error){showToast('Load error: '+error.message,'error');return;}
@@ -1329,7 +1342,6 @@ async function loadData(){
     page++;
   }
 
-  // Filter by view in JS
   let filtered = all;
   if(view==='mtf'){
     filtered = all.filter(r => mtfTickers.has(r.ticker));
@@ -1338,7 +1350,7 @@ async function loadData(){
   }
 
   if(!filtered.length){
-    document.getElementById('tableContainer').innerHTML='<div class="empty-state"><div class="e-icon">📂</div><p>No data. Upload BhavCopy files first.</p></div>';
+    document.getElementById('tableContainer').innerHTML='<div class="empty-state"><div class="e-icon">📂</div><p>No data found for this date range.</p></div>';
     updateStats([],[],{},{});
     return;
   }
@@ -1346,7 +1358,6 @@ async function loadData(){
   const dates  = [...new Set(filtered.map(r=>r.trade_date))].sort((a,b)=>b.localeCompare(a));
   const stocks = [...new Set(filtered.map(r=>r.ticker))].sort();
 
-  // Build grids: change_pct grid and full OHLC grid for streak detection
   const grid={}, ohlcGrid={}, volGrid={};
   filtered.forEach(r=>{
     if(!grid[r.ticker])    grid[r.ticker]={};
@@ -1354,7 +1365,7 @@ async function loadData(){
     if(!volGrid[r.ticker]) volGrid[r.ticker]={};
     grid[r.ticker][r.trade_date]    = r.change_pct;
     volGrid[r.ticker][r.trade_date] = r.volume;
-    ohlcGrid[r.ticker][r.trade_date] = r; // full row for isUC/isLC
+    ohlcGrid[r.ticker][r.trade_date] = r;
   });
 
   tableData={dates,stocks,grid,ohlcGrid,volGrid};
@@ -1362,27 +1373,23 @@ async function loadData(){
   updateStats(dates,stocks,grid,volGrid);
 }
 
-// ─── STREAK COMPUTATION (OHLC-based, unified with Circuit tab) ────────────────
+// ─── STREAK COMPUTATION ────────────────
 function computeStreak(ticker, dates, ohlcGrid){
-  // Need at least 1 date
   if(!dates.length) return {ucConsec:0,lcConsec:0,ucWin:0,lcWin:0,reversal:null};
-
   const getRow = d => ohlcGrid[ticker]?.[d] || null;
 
-  // Check reversal first: latest day flipped vs previous available day
   let reversal = null;
   if(dates.length >= 2){
-    const r0 = getRow(dates[0]); // latest
-    const r1 = getRow(dates[1]); // previous
+    const r0 = getRow(dates[0]); 
+    const r1 = getRow(dates[1]); 
     if(r0 && r1){
       const d0uc=isUC(r0), d0lc=isLC(r0);
       const d1uc=isUC(r1), d1lc=isLC(r1);
-      if(d0uc && d1lc) reversal='up';   // was LC, now UC
-      else if(d0lc && d1uc) reversal='dn'; // was UC, now LC
+      if(d0uc && d1lc) reversal='up';   
+      else if(d0lc && d1uc) reversal='dn'; 
     }
   }
 
-  // Consecutive streak from latest day
   let ucConsec=0, lcConsec=0;
   for(const d of dates){
     const r=getRow(d);
@@ -1394,7 +1401,6 @@ function computeStreak(ticker, dates, ohlcGrid){
     else if(lcConsec>0){ if(lc) lcConsec++; else break; }
   }
 
-  // Window hits within visible dates
   let ucWin=0, lcWin=0;
   dates.forEach(d=>{
     const r=getRow(d); if(!r) return;
@@ -1406,13 +1412,9 @@ function computeStreak(ticker, dates, ohlcGrid){
 }
 
 function fmtStreak(ucConsec, lcConsec, ucWin, lcWin, reversal){
-  // Priority 1: Reversal
-  if(reversal==='up')
-    return `<span class="streak streak-rev-up">↕ Rev↑</span>`;
-  if(reversal==='dn')
-    return `<span class="streak streak-rev-dn">↕ Rev↓</span>`;
+  if(reversal==='up') return `<span class="streak streak-rev-up">↕ Rev↑</span>`;
+  if(reversal==='dn') return `<span class="streak streak-rev-dn">↕ Rev↓</span>`;
 
-  // Priority 2: Consecutive streak
   if(ucConsec>=2){
     const label=ucConsec>=4?'4d+↑':`${ucConsec}d↑`;
     return `<span class="streak streak-uc-c">${label}</span>`;
@@ -1424,7 +1426,6 @@ function fmtStreak(ucConsec, lcConsec, ucWin, lcWin, reversal){
   if(ucConsec===1) return `<span class="streak streak-uc-c">1d↑</span>`;
   if(lcConsec===1) return `<span class="streak streak-lc-c">1d↓</span>`;
 
-  // Priority 3: Window hits
   if(ucWin>=3) return `<span class="streak streak-uc-w">2w+↑</span>`;
   if(ucWin===2) return `<span class="streak streak-uc-w">2w↑</span>`;
   if(ucWin===1) return `<span class="streak streak-uc-w">1w↑</span>`;
@@ -1446,10 +1447,7 @@ function renderTable(dates, stocks, grid, ohlcGrid, volGrid){
     return `<span class="${cls}">${n>0?'+':''}${n.toFixed(2)}%</span>`;
   };
 
-  // Track which dates have any data (for NA detection)
-  const datesWithData = new Set(
-    stocks.flatMap(t => Object.keys(grid[t]||{}))
-  );
+  const datesWithData = new Set(stocks.flatMap(t => Object.keys(grid[t]||{})));
 
   let html='<div class="table-wrap"><table><thead><tr><th>Stock</th><th>Streak</th><th>Band</th>';
   dates.forEach(d=>html+=`<th>${fmt(d)}</th>`);
@@ -1594,7 +1592,6 @@ async function exportCSV(mode='all'){
     if(to)   q=q.lte('trade_date',to);
     const {data,error}=await q; if(error||!data?.length) break; all=all.concat(data); if(data.length<PAGE) break; page++;
   }
-  // Filter in JS
   let filtered=all;
   if(mode==='mtf') filtered=all.filter(r=>mtfTickers.has(r.ticker));
   if(!filtered.length){showToast('No data','warn');return;}
