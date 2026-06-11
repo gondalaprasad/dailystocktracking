@@ -10,7 +10,6 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
-/* ── DARK THEME ── */
 [data-theme="dark"] {
   --bg:#0a0e1a; --surface:#111827; --surface2:#1a2235; --border:#1e2d45;
   --accent:#00d4aa; --accent2:#0099ff; --danger:#ff4757; --warn:#ffa502;
@@ -19,10 +18,8 @@
   --grid-line:rgba(0,212,170,.03);
   --shadow:rgba(0,0,0,.4);
   --th-bg:#1a2235; --td-sticky:#111827;
-  --scrollbar-thumb: #1e2d45;
-  --scrollbar-track: #0a0e1a;
+  --scrollbar-thumb:#1e2d45; --scrollbar-track:#0a0e1a;
 }
-/* ── LIGHT THEME ── */
 [data-theme="light"] {
   --bg:#f0f4f8; --surface:#ffffff; --surface2:#e8edf5; --border:#d0dae8;
   --accent:#00a884; --accent2:#0077cc; --danger:#e5263a; --warn:#e07b00;
@@ -31,8 +28,7 @@
   --grid-line:rgba(0,120,80,.04);
   --shadow:rgba(0,0,0,.12);
   --th-bg:#e8edf5; --td-sticky:#ffffff;
-  --scrollbar-thumb: #d0dae8;
-  --scrollbar-track: #f0f4f8;
+  --scrollbar-thumb:#d0dae8; --scrollbar-track:#f0f4f8;
 }
 
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -40,21 +36,19 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
 .app{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 24px 60px;}
 
-/* ── CUSTOM THEMED SCROLLBARS ── */
-.table-wrap::-webkit-scrollbar, .status-box::-webkit-scrollbar, .cal-year::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.table-wrap::-webkit-scrollbar-track, .status-box::-webkit-scrollbar-track, .cal-year::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
-}
-.table-wrap::-webkit-scrollbar-thumb, .status-box::-webkit-scrollbar-thumb, .cal-year::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: 4px;
-}
-.table-wrap::-webkit-scrollbar-thumb:hover, .status-box::-webkit-scrollbar-thumb:hover, .cal-year::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
-}
+/* SCROLLBARS — only on content areas, never on tabs */
+.table-wrap::-webkit-scrollbar,
+.status-box::-webkit-scrollbar,
+.cal-year::-webkit-scrollbar { width:8px; height:8px; }
+.table-wrap::-webkit-scrollbar-track,
+.status-box::-webkit-scrollbar-track,
+.cal-year::-webkit-scrollbar-track { background:var(--scrollbar-track); }
+.table-wrap::-webkit-scrollbar-thumb,
+.status-box::-webkit-scrollbar-thumb,
+.cal-year::-webkit-scrollbar-thumb { background:var(--scrollbar-thumb); border-radius:4px; }
+.table-wrap::-webkit-scrollbar-thumb:hover,
+.status-box::-webkit-scrollbar-thumb:hover,
+.cal-year::-webkit-scrollbar-thumb:hover { background:var(--accent); }
 
 /* HEADER */
 header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 28px;border-bottom:1px solid var(--border);margin-bottom:28px;flex-wrap:wrap;gap:12px;}
@@ -69,9 +63,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:20p
 .theme-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
 .theme-btn:hover{border-color:var(--accent);color:var(--accent);}
 
-/* TABS - Removed unexpected scroll layout properties */
-.tabs{display:flex;gap:2px;margin-bottom:24px;border-bottom:1px solid var(--border);overflow-x:hidden;}
-.tab{padding:9px 18px;font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--text2);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;letter-spacing:.5px;white-space:nowrap;}
+/* TABS — no scrollbar, no overflow scroll */
+.tabs{display:flex;gap:2px;margin-bottom:24px;border-bottom:1px solid var(--border);overflow:hidden;}
+.tab{padding:9px 18px;font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--text2);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;letter-spacing:.5px;white-space:nowrap;flex-shrink:0;}
 .tab:hover{color:var(--text);}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .panel{display:none;}.panel.active{display:block;}
@@ -181,7 +175,6 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
 .streak-lc-c{background:rgba(255,71,87,.12);color:var(--red);border:1px solid rgba(255,71,87,.25);}
 .streak-uc-w{background:rgba(0,212,170,.07);color:var(--green);border:1px dashed rgba(0,212,170,.3);}
 .streak-lc-w{background:rgba(255,71,87,.06);color:var(--red);border:1px dashed rgba(255,71,87,.25);}
-/* REVERSAL BADGE */
 .streak-rev-up{background:rgba(255,165,0,.15);color:#ffa502;border:1px solid rgba(255,165,0,.4);}
 .streak-rev-dn{background:rgba(180,0,255,.12);color:#cc44ff;border:1px solid rgba(180,0,255,.3);}
 .streak-none{color:var(--text3);font-size:11px;}
@@ -190,7 +183,6 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
 .skeleton{background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;}
 @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
 .skeleton-row{height:38px;margin-bottom:6px;}
-.skeleton-stat{height:64px;border-radius:10px;}
 
 /* MISC */
 .empty-state{text-align:center;padding:50px 20px;color:var(--text2);}
@@ -206,7 +198,7 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
 .upload-history-item .date{color:var(--accent);}
 
 /* CALENDAR */
-.cal-year{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;justify-content:flex-start;}
+.cal-year{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;}
 .cal-month-block{display:flex;flex-direction:column;align-items:flex-start;gap:5px;flex-shrink:0;}
 .cal-month-name{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--text2);letter-spacing:1px;text-transform:uppercase;padding-left:18px;}
 .cal-day{width:13px;height:13px;border-radius:2px;cursor:default;transition:transform .1s;flex-shrink:0;}
@@ -220,7 +212,7 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
 .cal-dow-labels{display:flex;flex-direction:column;gap:2px;margin-right:3px;}
 .cal-dow-label{font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--text3);height:13px;line-height:13px;width:14px;text-align:right;}
 
-/* KITE FETCH */
+/* KITE */
 .kite-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
 @media(max-width:600px){.kite-grid{grid-template-columns:1fr;}}
 .kite-progress{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:12px;display:none;}
@@ -257,8 +249,9 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
   <button class="tab" onclick="switchTab('history',this)">📁 History</button>
 </div>
 
+<!-- DASHBOARD -->
 <div class="panel active" id="panel-view">
-  <div class="stats-row" id="statsRow">
+  <div class="stats-row">
     <div class="stat-card"><div class="stat-label">Stocks</div><div class="stat-value" id="statStocks">—</div></div>
     <div class="stat-card"><div class="stat-label">Days</div><div class="stat-value" id="statDays">—</div></div>
     <div class="stat-card"><div class="stat-label">Latest Date</div><div class="stat-value" style="font-size:13px;margin-top:4px" id="statLastDate">—</div></div>
@@ -314,14 +307,12 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
     </div>
   </div>
   <div id="tableContainer">
-    <div id="tableSkeleton">
-      <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div>
-      <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div>
-      <div class="skeleton skeleton-row"></div>
-    </div>
+    <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div>
+    <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div>
   </div>
 </div>
 
+<!-- CIRCUIT -->
 <div class="panel" id="panel-circuit">
   <div class="circuit-header">
     <div class="circuit-title">⚡ Circuit Analytics</div>
@@ -356,6 +347,7 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
   </div>
 </div>
 
+<!-- UPLOAD -->
 <div class="panel" id="panel-upload">
   <div id="lockScreen">
     <div class="card">
@@ -371,7 +363,6 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
       </div>
     </div>
   </div>
-
   <div id="uploadForm" style="display:none">
     <div class="card">
       <div class="card-title">Upload BhavCopy CSV</div>
@@ -427,6 +418,7 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
   </div>
 </div>
 
+<!-- KITE FETCH -->
 <div class="panel" id="panel-kite">
   <div id="kiteLockScreen">
     <div class="card">
@@ -442,32 +434,18 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
       </div>
     </div>
   </div>
-
   <div id="kiteForm" style="display:none">
     <div class="card">
       <div class="card-title">Kite Connect — Fetch Historical Data</div>
       <p style="font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.7">
-        Fetches daily OHLCV data for all MTF stocks (or all NSE EQ) from Kite API and stores directly into Supabase.
-        Your API key and access token are <b style="color:var(--text)">never stored</b> — used only for this fetch session.
-        Access tokens expire daily so you'll enter a fresh one each time.
+        Fetches daily OHLCV data for all MTF stocks from Kite API and stores directly into Supabase.
+        Your API key and access token are <b style="color:var(--text)">never stored</b> — used only for this session.
       </p>
       <div class="kite-grid">
-        <div class="filter-group">
-          <div class="filter-label">Kite API Key</div>
-          <input type="text" id="kiteApiKey" placeholder="Your Kite API Key"/>
-        </div>
-        <div class="filter-group">
-          <div class="filter-label">Access Token (today's)</div>
-          <input type="text" id="kiteAccessToken" placeholder="Today's Access Token"/>
-        </div>
-        <div class="filter-group">
-          <div class="filter-label">From Date</div>
-          <input type="date" id="kiteFrom"/>
-        </div>
-        <div class="filter-group">
-          <div class="filter-label">To Date</div>
-          <input type="date" id="kiteTo"/>
-        </div>
+        <div class="filter-group"><div class="filter-label">Kite API Key</div><input type="text" id="kiteApiKey" placeholder="Your Kite API Key"/></div>
+        <div class="filter-group"><div class="filter-label">Access Token (today's)</div><input type="text" id="kiteAccessToken" placeholder="Today's Access Token"/></div>
+        <div class="filter-group"><div class="filter-label">From Date</div><input type="date" id="kiteFrom"/></div>
+        <div class="filter-group"><div class="filter-label">To Date</div><input type="date" id="kiteTo"/></div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <button class="btn btn-primary" id="kiteFetchBtn" onclick="startKiteFetch()">🔌 Fetch &amp; Upload</button>
@@ -483,16 +461,16 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
     <div class="card" style="background:rgba(255,165,0,.04);border-color:rgba(255,165,0,.2)">
       <div class="card-title" style="color:var(--warn)">ℹ️ Notes</div>
       <ul style="font-size:12px;color:var(--text2);line-height:2;padding-left:18px;">
-        <li>Kite historical API rate limit: <b style="color:var(--text)">2–3 requests/sec</b> — fetch is throttled automatically</li>
-        <li>Fetching all ~1500 MTF stocks for 1 date range takes <b style="color:var(--text)">~10–12 minutes</b></li>
+        <li>Kite historical API rate limit: <b style="color:var(--text)">2–3 req/sec</b> — throttled automatically</li>
+        <li>~1500 MTF stocks for 1 date range ≈ <b style="color:var(--text)">10–12 minutes</b></li>
         <li>Duplicate rows (same date+ticker) are automatically skipped</li>
-        <li>Access token is valid only for today — generate fresh from Kite developer console</li>
-        <li>Daily candle data available up to <b style="color:var(--text)">2000 days</b> per request</li>
+        <li>Access token valid only for today — generate fresh from Kite developer console</li>
       </ul>
     </div>
   </div>
 </div>
 
+<!-- HISTORY -->
 <div class="panel" id="panel-history">
   <div class="card">
     <div class="card-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -518,41 +496,44 @@ tr:hover td:first-child,tr:hover td:nth-child(2),tr:hover td:nth-child(3){backgr
   </div>
 </div>
 
-</div><div id="toast"></div>
+</div>
+<div id="toast"></div>
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-const SUPABASE_URL  = 'https://dlldfbvdtclkjkeyedfr.supabase.co';
-const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsbGRmYnZkdGNsa2prZXllZGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTQ1NzIsImV4cCI6MjA5NjEzMDU3Mn0.i5XXXL-CjjJxE9-raLAWIJ_5e4bh4uomttHZ_jZK_5g';
-const PW_HASH       = 'c6921db35433b952fc0aaf3c5be362be013a294cf24d4633adcdcf7c91e4c4c9';
-const EDGE_URL      = 'https://dlldfbvdtclkjkeyedfr.supabase.co/functions/v1/kite-fetch';
-const TABLE         = 'bhav_data';
-const MTF_TABLE     = 'mtf_tickers';
-const BAND_TABLE    = 'price_bands';
-const DEFAULT_DAYS  = 7;
+const SUPABASE_URL = 'https://dlldfbvdtclkjkeyedfr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsbGRmYnZkdGNsa2prZXllZGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTQ1NzIsImV4cCI6MjA5NjEzMDU3Mn0.i5XXXL-CjjJxE9-raLAWIJ_5e4bh4uomttHZ_jZK_5g';
+const PW_HASH      = 'c6921db35433b952fc0aaf3c5be362be013a294cf24d4633adcdcf7c91e4c4c9';
+const EDGE_URL     = 'https://dlldfbvdtclkjkeyedfr.supabase.co/functions/v1/kite-fetch';
+const TABLE        = 'bhav_data';
+const MTF_TABLE    = 'mtf_tickers';
+const BAND_TABLE   = 'price_bands';
+const DEFAULT_DAYS = 7;  // default trading days to auto-load
+const MAX_COL_DAYS = 7;  // max date columns shown regardless of range selected
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let parsedRows        = [];
-let tableData         = { dates:[], stocks:[], grid:{}, ohlcGrid:{} };
-let mtfTickers        = new Set();
-let mtfIsinMap        = {};
-let priceBands        = {};
-let circuitData       = null;
-let currentCircuitRows= [];
-let _historyCounts    = {}, _historyMaxCount=1, _historyYears=[];
+let parsedRows         = [];
+let tableData          = { dates:[], stocks:[], grid:{}, ohlcGrid:{}, volGrid:{} };
+let mtfTickers         = new Set();
+let mtfIsinMap         = {};
+let priceBands         = {};
+let circuitData        = null;
+let currentCircuitRows = [];
+let _historyCounts     = {}, _historyMaxCount = 1, _historyYears = [];
 
 // ─── UNIFIED CIRCUIT DETECTION ────────────────────────────────────────────────
+// Fuzzy band tolerance: handles 4.99% counting as 5% circuit etc.
 const BAND_TOLERANCE = {
-  '2':  { uc: 1.80, lc: -1.80 },
-  '5':  { uc: 4.70, lc: -4.70 },
-  '10': { uc: 9.50, lc: -9.50 },
-  '20': { uc: 19.0, lc: -19.0 },
+  '2':  { uc:  1.80, lc:  -1.80 },
+  '5':  { uc:  4.70, lc:  -4.70 },
+  '10': { uc:  9.50, lc:  -9.50 },
+  '20': { uc: 19.00, lc: -19.00 },
 };
 
 function isUC(row) {
   const band = priceBands[row.ticker];
-  if (band === 'No Band') return false;
+  if (band === 'No Band') return false;  // F&O — no circuit
   const tol = band && BAND_TOLERANCE[band];
   if (tol) {
     const chg = row.change_pct != null
@@ -561,6 +542,7 @@ function isUC(row) {
     if (chg == null) return false;
     return chg >= tol.uc;
   }
+  // Unknown band — fallback: close ≈ high within 0.1%
   if (!row.close || !row.high) return false;
   return Math.abs(row.close - row.high) / row.high < 0.001;
 }
@@ -584,10 +566,10 @@ function isLC(row) {
 window.addEventListener('DOMContentLoaded', async () => {
   const saved = localStorage.getItem('bhavTheme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
-  document.getElementById('themeBtn').textContent = saved==='dark'?'🌙':'☀️';
+  document.getElementById('themeBtn').textContent = saved === 'dark' ? '🌙' : '☀️';
 
   const today = new Date();
-  const past  = new Date(today); past.setDate(past.getDate()-14);
+  const past  = new Date(today); past.setDate(past.getDate() - 14);
   document.getElementById('kiteFrom').value = fmtDate(past);
   document.getElementById('kiteTo').value   = fmtDate(today);
 
@@ -601,17 +583,17 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // ─── THEME ────────────────────────────────────────────────────────────────────
 function toggleTheme() {
-  const cur = document.documentElement.getAttribute('data-theme');
-  const next = cur==='dark'?'light':'dark';
-  document.documentElement.setAttribute('data-theme',next);
-  document.getElementById('themeBtn').textContent = next==='dark'?'🌙':'☀️';
-  localStorage.setItem('bhavTheme',next);
+  const cur  = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = next === 'dark' ? '🌙' : '☀️';
+  localStorage.setItem('bhavTheme', next);
 }
 
 // ─── CONNECTION ───────────────────────────────────────────────────────────────
 async function checkConnection() {
   try {
-    const {error} = await sb.from(TABLE).select('trade_date',{count:'exact',head:true});
+    const { error } = await sb.from(TABLE).select('trade_date', { count:'exact', head:true });
     if (error) throw error;
     document.getElementById('statusDot').classList.add('connected');
     document.getElementById('statusLabel').textContent = 'connected';
@@ -622,1032 +604,1044 @@ async function checkConnection() {
 
 // ─── PASSWORD ─────────────────────────────────────────────────────────────────
 async function sha256(str) {
-  const buf = await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 async function unlock() {
   const h = await sha256(document.getElementById('pwInput').value);
-  if (h===PW_HASH) {
-    document.getElementById('lockScreen').style.display='none';
-    document.getElementById('uploadForm').style.display='block';
-    document.getElementById('pwError').style.display='none';
-    document.getElementById('pwInput').value='';
+  if (h === PW_HASH) {
+    document.getElementById('lockScreen').style.display  = 'none';
+    document.getElementById('uploadForm').style.display  = 'block';
+    document.getElementById('pwError').style.display     = 'none';
+    document.getElementById('pwInput').value             = '';
   } else {
-    document.getElementById('pwError').style.display='block';
-    document.getElementById('pwInput').value='';
+    document.getElementById('pwError').style.display = 'block';
+    document.getElementById('pwInput').value         = '';
   }
 }
 function lock() {
-  document.getElementById('lockScreen').style.display='block';
-  document.getElementById('uploadForm').style.display='none';
+  document.getElementById('lockScreen').style.display = 'block';
+  document.getElementById('uploadForm').style.display = 'none';
   clearUpload();
 }
-async function kiteUnlock(doLock=false) {
+async function kiteUnlock(doLock = false) {
   if (doLock) {
-    document.getElementById('kiteLockScreen').style.display='block';
-    document.getElementById('kiteForm').style.display='none';
-    document.getElementById('kiteApiKey').value='';
-    document.getElementById('kiteAccessToken').value='';
-    return;
+    document.getElementById('kiteLockScreen').style.display = 'block';
+    document.getElementById('kiteForm').style.display       = 'none';
+    document.getElementById('kiteApiKey').value             = '';
+    document.getElementById('kiteAccessToken').value        = '';
   }
 }
+let _kiteRawPw = '';
+async function kiteUnlockWithPw() {
+  const pw = document.getElementById('kitePwInput').value;
+  const h  = await sha256(pw);
+  if (h === PW_HASH) {
+    _kiteRawPw = pw;
+    document.getElementById('kiteLockScreen').style.display = 'none';
+    document.getElementById('kiteForm').style.display       = 'block';
+    document.getElementById('kitePwError').style.display    = 'none';
+    document.getElementById('kitePwInput').value            = '';
+  } else {
+    document.getElementById('kitePwError').style.display = 'block';
+    document.getElementById('kitePwInput').value         = '';
+  }
+}
+async function getPasswordForEdge() { return _kiteRawPw; }
 
 // ─── MTF ──────────────────────────────────────────────────────────────────────
-async function loadMtfTickers(force=false) {
+async function loadMtfTickers(force = false) {
   const cached = sessionStorage.getItem('mtfTickers');
-  if (cached&&!force) { mtfTickers=new Set(JSON.parse(cached)); }
-  else {
-    const PAGE=1000; let all=[],page=0;
-    while(true) {
-      const {data,error}=await sb.from(MTF_TABLE).select('ticker,isin').range(page*PAGE,(page+1)*PAGE-1);
-      if(error||!data?.length) break; all=all.concat(data); if(data.length<PAGE) break; page++;
+  if (cached && !force) {
+    mtfTickers = new Set(JSON.parse(cached));
+  } else {
+    const PAGE = 1000; let all = [], page = 0;
+    while (true) {
+      const { data, error } = await sb.from(MTF_TABLE).select('ticker,isin').range(page*PAGE, (page+1)*PAGE-1);
+      if (error || !data?.length) break;
+      all = all.concat(data);
+      if (data.length < PAGE) break;
+      page++;
     }
-    mtfTickers=new Set(all.map(r=>r.ticker)); mtfIsinMap={};
-    all.forEach(r=>{if(r.isin) mtfIsinMap[r.isin]=r.ticker;});
-    sessionStorage.setItem('mtfTickers',JSON.stringify([...mtfTickers]));
+    mtfTickers = new Set(all.map(r => r.ticker));
+    mtfIsinMap = {};
+    all.forEach(r => { if (r.isin) mtfIsinMap[r.isin] = r.ticker; });
+    sessionStorage.setItem('mtfTickers', JSON.stringify([...mtfTickers]));
   }
-  const el=document.getElementById('mtfCurrentCount');
-  if(el) el.textContent=mtfTickers.size?`${mtfTickers.size} MTF stocks stored`:'No MTF list yet';
-  const s=document.getElementById('statMtf'); if(s) s.textContent=mtfTickers.size||'—';
+  const el = document.getElementById('mtfCurrentCount');
+  if (el) el.textContent = mtfTickers.size ? `${mtfTickers.size} MTF stocks stored` : 'No MTF list yet';
+  const s = document.getElementById('statMtf');
+  if (s) s.textContent = mtfTickers.size || '—';
 }
 
 function handleMtfFile(file) {
-  if(!file?.name.endsWith('.csv')){showToast('Need .csv','error');return;}
-  const box=document.getElementById('mtfStatusBox'); box.innerHTML=''; box.classList.add('show');
-  addBoxStatus(box,'info',`📄 ${file.name}`);
-  Papa.parse(file,{header:true,skipEmptyLines:true,complete:result=>{
-    const rows=result.data,fields=result.meta.fields||[];
-    const symCol=fields.find(f=>/tradingsymbol|symbol/i.test(f));
-    if(!symCol){addBoxStatus(box,'err','✗ No symbol column');return;}
-    const isinCol=fields.find(f=>/isin/i.test(f));
-    const catCol=fields.find(f=>/category/i.test(f));
-    const marCol=fields.find(f=>/margin/i.test(f));
-    const levCol=fields.find(f=>/leverage/i.test(f));
-    const tickers=rows.map(r=>({
-      ticker:(r[symCol]||'').trim().toUpperCase(),
-      isin:isinCol?(r[isinCol]||'').trim():null,
-      category:catCol?(r[catCol]||'').trim():null,
-      margin:marCol?parseFloat(r[marCol])||null:null,
-      leverage:levCol?parseFloat(r[levCol])||null:null,
-      upload_date:new Date().toISOString().slice(0,10)
-    })).filter(r=>r.ticker);
-    addBoxStatus(box,'ok',`✓ ${tickers.length} tickers`);
-    addBoxStatus(box,'warn','⚠ Click Save MTF List');
-    window._pendingMtf=tickers;
-    document.getElementById('mtfUploadBtn').disabled=false;
-  },error:e=>addBoxStatus(box,'err','Parse error: '+e.message)});
+  if (!file?.name.endsWith('.csv')) { showToast('Need .csv', 'error'); return; }
+  const box = document.getElementById('mtfStatusBox');
+  box.innerHTML = ''; box.classList.add('show');
+  addBoxStatus(box, 'info', `📄 ${file.name}`);
+  Papa.parse(file, { header:true, skipEmptyLines:true, complete: result => {
+    const rows = result.data, fields = result.meta.fields || [];
+    const symCol = fields.find(f => /tradingsymbol|symbol/i.test(f));
+    if (!symCol) { addBoxStatus(box, 'err', '✗ No symbol column'); return; }
+    const isinCol = fields.find(f => /isin/i.test(f));
+    const catCol  = fields.find(f => /category/i.test(f));
+    const marCol  = fields.find(f => /margin/i.test(f));
+    const levCol  = fields.find(f => /leverage/i.test(f));
+    const tickers = rows.map(r => ({
+      ticker:    (r[symCol] || '').trim().toUpperCase(),
+      isin:      isinCol ? (r[isinCol] || '').trim() : null,
+      category:  catCol  ? (r[catCol]  || '').trim() : null,
+      margin:    marCol  ? parseFloat(r[marCol])  || null : null,
+      leverage:  levCol  ? parseFloat(r[levCol])  || null : null,
+      upload_date: new Date().toISOString().slice(0, 10)
+    })).filter(r => r.ticker);
+    addBoxStatus(box, 'ok',   `✓ ${tickers.length} tickers`);
+    addBoxStatus(box, 'warn', '⚠ Click Save MTF List');
+    window._pendingMtf = tickers;
+    document.getElementById('mtfUploadBtn').disabled = false;
+  }, error: e => addBoxStatus(box, 'err', 'Parse error: ' + e.message) });
 }
 
 async function uploadMtfList() {
-  const rows=window._pendingMtf; if(!rows?.length) return;
-  const box=document.getElementById('mtfStatusBox');
-  document.getElementById('mtfUploadBtn').disabled=true;
-  addBoxStatus(box,'info','⏳ Clearing...');
-  await sb.from(MTF_TABLE).delete().neq('ticker','__NONE__');
-  addBoxStatus(box,'info',`⏳ Inserting ${rows.length} rows...`);
-  const BATCH=500;
-  for(let i=0;i<rows.length;i+=BATCH){
-    const {error}=await sb.from(MTF_TABLE).upsert(rows.slice(i,i+BATCH),{onConflict:'ticker'});
-    if(error){addBoxStatus(box,'err','✗ '+error.message);return;}
+  const rows = window._pendingMtf; if (!rows?.length) return;
+  const box = document.getElementById('mtfStatusBox');
+  document.getElementById('mtfUploadBtn').disabled = true;
+  addBoxStatus(box, 'info', '⏳ Clearing...');
+  await sb.from(MTF_TABLE).delete().neq('ticker', '__NONE__');
+  addBoxStatus(box, 'info', `⏳ Inserting ${rows.length} rows...`);
+  const BATCH = 500;
+  for (let i = 0; i < rows.length; i += BATCH) {
+    const { error } = await sb.from(MTF_TABLE).upsert(rows.slice(i, i+BATCH), { onConflict:'ticker' });
+    if (error) { addBoxStatus(box, 'err', '✗ ' + error.message); return; }
   }
-  addBoxStatus(box,'ok',`✓ Saved ${rows.length} MTF stocks`);
-  showToast(`✓ MTF updated: ${rows.length}`,'success');
-  window._pendingMtf=null; sessionStorage.removeItem('mtfTickers');
-  await loadMtfTickers(true); circuitData=null; await loadData();
+  addBoxStatus(box, 'ok', `✓ Saved ${rows.length} MTF stocks`);
+  showToast(`✓ MTF updated: ${rows.length}`, 'success');
+  window._pendingMtf = null;
+  sessionStorage.removeItem('mtfTickers');
+  await loadMtfTickers(true);
+  circuitData = null;
+  await loadData();
 }
 
 // ─── PRICE BANDS ──────────────────────────────────────────────────────────────
-async function loadPriceBands(force=false) {
-  const cached=sessionStorage.getItem('priceBands');
-  if(cached&&!force){priceBands=JSON.parse(cached);}
-  else {
-    const PAGE=1000; let all=[],page=0;
-    while(true){
-      const {data,error}=await sb.from(BAND_TABLE).select('ticker,band').range(page*PAGE,(page+1)*PAGE-1);
-      if(error||!data?.length) break; all=all.concat(data); if(data.length<PAGE) break; page++;
+async function loadPriceBands(force = false) {
+  const cached = sessionStorage.getItem('priceBands');
+  if (cached && !force) {
+    priceBands = JSON.parse(cached);
+  } else {
+    const PAGE = 1000; let all = [], page = 0;
+    while (true) {
+      const { data, error } = await sb.from(BAND_TABLE).select('ticker,band').range(page*PAGE, (page+1)*PAGE-1);
+      if (error || !data?.length) break;
+      all = all.concat(data);
+      if (data.length < PAGE) break;
+      page++;
     }
-    priceBands={}; all.forEach(r=>{priceBands[r.ticker]=r.band;});
-    sessionStorage.setItem('priceBands',JSON.stringify(priceBands));
+    priceBands = {};
+    all.forEach(r => { priceBands[r.ticker] = r.band; });
+    sessionStorage.setItem('priceBands', JSON.stringify(priceBands));
   }
-  const count=Object.keys(priceBands).length;
-  const el=document.getElementById('bandCurrentCount'); if(el) el.textContent=count?`${count} stocks`:'No bands yet';
-  const s=document.getElementById('statBands'); if(s) s.textContent=count||'—';
+  const count = Object.keys(priceBands).length;
+  const el = document.getElementById('bandCurrentCount');
+  if (el) el.textContent = count ? `${count} stocks` : 'No bands yet';
+  const s = document.getElementById('statBands');
+  if (s) s.textContent = count || '—';
 }
 
 function handleBandFile(file) {
-  if(!file?.name.endsWith('.csv')){showToast('Need .csv','error');return;}
-  const box=document.getElementById('bandStatusBox'); box.innerHTML=''; box.classList.add('show');
-  addBoxStatus(box,'info',`📄 ${file.name}`);
-  Papa.parse(file,{header:true,skipEmptyLines:true,complete:result=>{
-    const rows=result.data,fields=result.meta.fields||[];
-    const symCol=fields.find(f=>/^symbol$/i.test(f));
-    const serCol=fields.find(f=>/^series$/i.test(f));
-    const bandCol=fields.find(f=>/^band$/i.test(f));
-    const remCol=fields.find(f=>/remark/i.test(f));
-    if(!symCol||!bandCol){addBoxStatus(box,'err','✗ Need Symbol+Band cols');return;}
-    const bc={};
-    const mapped=rows.map(r=>{
-      const b=(r[bandCol]||'').trim(); bc[b]=(bc[b]||0)+1;
-      return{ticker:(r[symCol]||'').trim().toUpperCase(),series:serCol?(r[serCol]||'').trim():null,band:b,remarks:remCol?(r[remCol]||'').trim():null,upload_date:new Date().toISOString().slice(0,10)};
-    }).filter(r=>r.ticker);
-    addBoxStatus(box,'ok',`✓ ${mapped.length} rows: ${Object.entries(bc).map(([b,c])=>`${b}:${c}`).join(', ')}`);
-    addBoxStatus(box['warn'],'⚠ Click Save Price Bands');
-    window._pendingBands=mapped; document.getElementById('bandUploadBtn').disabled=false;
-  },error:e=>addBoxStatus(box,'err','Parse error: '+e.message)});
+  if (!file?.name.endsWith('.csv')) { showToast('Need .csv', 'error'); return; }
+  const box = document.getElementById('bandStatusBox');
+  box.innerHTML = ''; box.classList.add('show');
+  addBoxStatus(box, 'info', `📄 ${file.name}`);
+  Papa.parse(file, { header:true, skipEmptyLines:true, complete: result => {
+    const rows = result.data, fields = result.meta.fields || [];
+    const symCol  = fields.find(f => /^symbol$/i.test(f));
+    const serCol  = fields.find(f => /^series$/i.test(f));
+    const bandCol = fields.find(f => /^band$/i.test(f));
+    const remCol  = fields.find(f => /remark/i.test(f));
+    if (!symCol || !bandCol) { addBoxStatus(box, 'err', '✗ Need Symbol+Band cols'); return; }
+    const bc = {};
+    const mapped = rows.map(r => {
+      const b = (r[bandCol] || '').trim(); bc[b] = (bc[b] || 0) + 1;
+      return {
+        ticker:  (r[symCol] || '').trim().toUpperCase(),
+        series:  serCol ? (r[serCol] || '').trim() : null,
+        band:    b,
+        remarks: remCol ? (r[remCol] || '').trim() : null,
+        upload_date: new Date().toISOString().slice(0, 10)
+      };
+    }).filter(r => r.ticker);
+    addBoxStatus(box, 'ok',   `✓ ${mapped.length} rows: ${Object.entries(bc).map(([b,c]) => `${b}:${c}`).join(', ')}`);
+    addBoxStatus(box, 'warn', '⚠ Click Save Price Bands');
+    window._pendingBands = mapped;
+    document.getElementById('bandUploadBtn').disabled = false;
+  }, error: e => addBoxStatus(box, 'err', 'Parse error: ' + e.message) });
 }
 
 async function uploadBandList() {
-  const rows=window._pendingBands; if(!rows?.length) return;
-  const box=document.getElementById('bandStatusBox');
-  document.getElementById('bandUploadBtn').disabled=true;
-  addBoxStatus(box,'info','⏳ Clearing...');
-  await sb.from(BAND_TABLE).delete().neq('ticker','__NONE__');
-  addBoxStatus(box,'info',`⏳ Inserting ${rows.length}...`);
-  const BATCH=500;
-  for(let i=0;i<rows.length;i+=BATCH){
-    const {error}=await sb.from(BAND_TABLE).upsert(rows.slice(i,i+BATCH),{onConflict:'ticker,series'});
-    if(error){addBoxStatus(box,'err','✗ '+error.message);return;}
+  const rows = window._pendingBands; if (!rows?.length) return;
+  const box = document.getElementById('bandStatusBox');
+  document.getElementById('bandUploadBtn').disabled = true;
+  addBoxStatus(box, 'info', '⏳ Clearing...');
+  await sb.from(BAND_TABLE).delete().neq('ticker', '__NONE__');
+  addBoxStatus(box, 'info', `⏳ Inserting ${rows.length}...`);
+  const BATCH = 500;
+  for (let i = 0; i < rows.length; i += BATCH) {
+    const { error } = await sb.from(BAND_TABLE).upsert(rows.slice(i, i+BATCH), { onConflict:'ticker,series' });
+    if (error) { addBoxStatus(box, 'err', '✗ ' + error.message); return; }
   }
-  addBoxStatus(box,'ok',`✓ Saved ${rows.length} bands`);
-  showToast(`✓ Price bands updated`,'success');
-  window._pendingBands=null; sessionStorage.removeItem('priceBands');
-  circuitData=null; await loadPriceBands(true);
+  addBoxStatus(box, 'ok', `✓ Saved ${rows.length} bands`);
+  showToast('✓ Price bands updated', 'success');
+  window._pendingBands = null;
+  sessionStorage.removeItem('priceBands');
+  circuitData = null;
+  await loadPriceBands(true);
 }
 
 // ─── KITE FETCH ───────────────────────────────────────────────────────────────
-let _kiteRawPw='';
-async function kiteUnlockWithPw() {
-  const pw=document.getElementById('kitePwInput').value;
-  const h=await sha256(pw);
-  if(h===PW_HASH){
-    _kiteRawPw=pw;
-    document.getElementById('kiteLockScreen').style.display='none';
-    document.getElementById('kiteForm').style.display='block';
-    document.getElementById('kitePwError').style.display='none';
-    document.getElementById('kitePwInput').value='';
-  } else {
-    document.getElementById('kitePwError').style.display='block';
-    document.getElementById('kitePwInput').value='';
-  }
-}
-async function getPasswordForEdge(){return _kiteRawPw;}
-
 async function startKiteFetch() {
-  const apiKey=document.getElementById('kiteApiKey').value.trim();
-  const token=document.getElementById('kiteAccessToken').value.trim();
-  const from=document.getElementById('kiteFrom').value;
-  const to=document.getElementById('kiteTo').value;
-  if(!apiKey||!token){showToast('Enter API key and access token','error');return;}
-  if(!from||!to){showToast('Enter from and to dates','error');return;}
+  const apiKey = document.getElementById('kiteApiKey').value.trim();
+  const token  = document.getElementById('kiteAccessToken').value.trim();
+  const from   = document.getElementById('kiteFrom').value;
+  const to     = document.getElementById('kiteTo').value;
+  if (!apiKey || !token) { showToast('Enter API key and access token', 'error'); return; }
+  if (!from || !to)      { showToast('Enter from and to dates', 'error'); return; }
 
-  const box=document.getElementById('kiteStatusBox');
-  box.innerHTML=''; box.classList.add('show');
-  const prog=document.getElementById('kiteProgress'); prog.classList.add('show');
-  document.getElementById('kiteFetchBtn').disabled=true;
+  const box = document.getElementById('kiteStatusBox');
+  box.innerHTML = ''; box.classList.add('show');
+  document.getElementById('kiteProgress').classList.add('show');
+  document.getElementById('kiteFetchBtn').disabled = true;
 
-  let allTickers=[...mtfTickers];
-  if(!allTickers.length){
-    addBoxStatus(box,'warn','⚠ No MTF list — fetching all NSE EQ (slower)');
-    allTickers=[];
+  let allTickers = [...mtfTickers];
+  if (!allTickers.length) {
+    addBoxStatus(box, 'warn', '⚠ No MTF list — fetching all NSE EQ (slower)');
+    allTickers = [];
   }
 
-  const BATCH_SIZE=50;
-  const batches=allTickers.length>0?Math.ceil(allTickers.length/BATCH_SIZE):1;
-  const totalTickers=allTickers.length||'all';
+  const BATCH_SIZE = 50;
+  const batches    = allTickers.length > 0 ? Math.ceil(allTickers.length / BATCH_SIZE) : 1;
 
-  addBoxStatus(box,'info',`Fetching ${from} → ${to}`);
-  addBoxStatus(box,'info',`${totalTickers} tickers in ${batches} batch(es) of ${BATCH_SIZE}`);
+  addBoxStatus(box, 'info', `Fetching ${from} → ${to}`);
+  addBoxStatus(box, 'info', `${allTickers.length || 'all'} tickers in ${batches} batch(es)`);
 
-  let totalInserted=0, totalSkipped=0, totalErrors=0;
-  const allErrorSamples=[];
+  let totalInserted = 0, totalSkipped = 0, totalErrors = 0;
 
-  for(let b=0; b<batches; b++){
-    const batchTickers=allTickers.length>0
-      ? allTickers.slice(b*BATCH_SIZE, (b+1)*BATCH_SIZE)
-      : [];
-
-    const batchNum=b+1;
-    document.getElementById('kiteProgressText').textContent=`⏳ Batch ${batchNum}/${batches}`;
-    const pct=Math.round((b/batches)*100);
-    document.getElementById('kiteProgBar').style.width=pct+'%';
-    const estMin=Math.round(((batches-batchNum)*25)/60);
-    document.getElementById('kiteProgressSub').textContent=
-      `${batchNum}/${batches} batches · ~${estMin>0?estMin+' min left':'finishing up'}`;
+  for (let b = 0; b < batches; b++) {
+    const batchTickers = allTickers.length > 0 ? allTickers.slice(b*BATCH_SIZE, (b+1)*BATCH_SIZE) : [];
+    const batchNum = b + 1;
+    document.getElementById('kiteProgressText').textContent = `⏳ Batch ${batchNum}/${batches}`;
+    document.getElementById('kiteProgBar').style.width = Math.round((b / batches) * 100) + '%';
+    const estMin = Math.round(((batches - batchNum) * 25) / 60);
+    document.getElementById('kiteProgressSub').textContent =
+      `${batchNum}/${batches} · ~${estMin > 0 ? estMin + ' min left' : 'finishing up'}`;
 
     try {
-      const res=await fetch(EDGE_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          password:await getPasswordForEdge(),
-          api_key:apiKey,
-          access_token:token,
-          from_date:from,
-          to_date:to,
-          tickers:batchTickers
+      const res  = await fetch(EDGE_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          password:     await getPasswordForEdge(),
+          api_key:      apiKey,
+          access_token: token,
+          from_date:    from,
+          to_date:      to,
+          tickers:      batchTickers
         })
       });
+      const text = await res.text();
+      let data; try { data = JSON.parse(text); } catch(_) { data = null; }
 
-      const text=await res.text();
-      let data;
-      try { data=JSON.parse(text); } catch(_){ data=null; }
-
-      if(!res.ok){
-        const errMsg=data?.error||data?.message||text?.substring(0,200)||('HTTP '+res.status);
-        addBoxStatus(box,'err',`✗ Batch ${batchNum} failed: ${errMsg}`);
-        document.getElementById('kiteProgressText').textContent='✗ Failed at batch '+batchNum;
-        document.getElementById('kiteProgBar').style.width='0%';
-        document.getElementById('kiteFetchBtn').disabled=false;
+      if (!res.ok) {
+        addBoxStatus(box, 'err', `✗ Batch ${batchNum} failed: ${data?.error || text?.substring(0,200) || 'HTTP ' + res.status}`);
+        document.getElementById('kiteProgressText').textContent = '✗ Failed at batch ' + batchNum;
+        document.getElementById('kiteProgBar').style.width = '0%';
+        document.getElementById('kiteFetchBtn').disabled = false;
         return;
       }
-
-      if(!data?.summary){
-        addBoxStatus(box,'err',`✗ Batch ${batchNum}: Unexpected response`);
-        document.getElementById('kiteProgressText').textContent='✗ Failed';
-        document.getElementById('kiteProgBar').style.width='0%';
-        document.getElementById('kiteFetchBtn').disabled=false;
+      if (!data?.summary) {
+        addBoxStatus(box, 'err', `✗ Batch ${batchNum}: Unexpected response`);
+        document.getElementById('kiteProgressText').textContent = '✗ Failed';
+        document.getElementById('kiteProgBar').style.width = '0%';
+        document.getElementById('kiteFetchBtn').disabled = false;
         return;
       }
-
-      const s=data.summary;
-      totalInserted+=s.rows_inserted;
-      totalSkipped+=s.symbols_skipped;
-      totalErrors+=s.errors;
-      if(s.error_samples?.length) allErrorSamples.push(...s.error_samples);
-
-      addBoxStatus(box,'ok',`Batch ${batchNum}/${batches}: ${s.rows_inserted} rows, ${s.symbols_skipped} skipped, ${s.errors} errors`);
+      const s = data.summary;
+      totalInserted += s.rows_inserted;
+      totalSkipped  += s.symbols_skipped;
+      totalErrors   += s.errors;
+      addBoxStatus(box, 'ok', `Batch ${batchNum}/${batches}: ${s.rows_inserted} rows, ${s.symbols_skipped} skipped, ${s.errors} errors`);
+      if (s.error_samples?.length) s.error_samples.slice(0,3).forEach(e => addBoxStatus(box, 'warn', '  ⚠ ' + e));
 
     } catch(e) {
-      addBoxStatus(box,'err',`✗ Batch ${batchNum} network error: ${e.message}`);
-      document.getElementById('kiteProgressText').textContent='✗ Error at batch '+batchNum;
-      document.getElementById('kiteFetchBtn').disabled=false;
+      addBoxStatus(box, 'err', `✗ Batch ${batchNum} network error: ${e.message}`);
+      document.getElementById('kiteProgressText').textContent = '✗ Error at batch ' + batchNum;
+      document.getElementById('kiteFetchBtn').disabled = false;
       return;
     }
   }
 
-  document.getElementById('kiteProgBar').style.width='100%';
-  document.getElementById('kiteProgressText').textContent='✓ Complete!';
-  document.getElementById('kiteProgressSub').textContent='';
-  addBoxStatus(box,'ok',`✓ Total rows inserted: ${totalInserted}`);
-  addBoxStatus(box,'info',`  Skipped: ${totalSkipped}, Errors: ${totalErrors}`);
-  if(allErrorSamples.length) allErrorSamples.slice(0,20).forEach(e=>addBoxStatus(box,'warn','  ⚠ '+e));
-  showToast(`✓ Kite fetch done: ${totalInserted} rows`,'success');
-  circuitData=null; await loadData();
-  document.getElementById('kiteFetchBtn').disabled=false;
+  document.getElementById('kiteProgBar').style.width = '100%';
+  document.getElementById('kiteProgressText').textContent = '✓ Complete!';
+  document.getElementById('kiteProgressSub').textContent  = '';
+  addBoxStatus(box, 'ok',   `✓ Total rows inserted: ${totalInserted}`);
+  addBoxStatus(box, 'info', `  Skipped: ${totalSkipped}, Errors: ${totalErrors}`);
+  showToast(`✓ Kite fetch done: ${totalInserted} rows`, 'success');
+  circuitData = null;
+  await loadData();
+  document.getElementById('kiteFetchBtn').disabled = false;
 }
 
 // ─── CIRCUIT TAB ──────────────────────────────────────────────────────────────
 async function loadCircuitData() {
-  document.getElementById('circuitLoading').style.display='block';
-  ['ucRows','lcRows','bandRows','summaryRows'].forEach(id=>{
-    document.getElementById(id).innerHTML='<div style="color:var(--text3);font-size:12px">Loading...</div>';
+  document.getElementById('circuitLoading').style.display = 'block';
+  ['ucRows','lcRows','bandRows','summaryRows'].forEach(id => {
+    document.getElementById(id).innerHTML = '<div style="color:var(--text3);font-size:12px">Loading...</div>';
   });
 
-  const PAGE=1000; let all=[],page=0;
-  while(true){
-    const {data,error}=await sb.from(TABLE)
+  // Fetch all EQ data — no ticker IN clause, filter in JS
+  const PAGE = 1000; let all = [], page = 0;
+  while (true) {
+    const { data, error } = await sb.from(TABLE)
       .select('trade_date,ticker,series,close,high,low,prev_close,change_pct,volume')
-      .eq('series','EQ')
-      .order('trade_date',{ascending:false})
-      .range(page*PAGE,(page+1)*PAGE-1);
-    if(error||!data?.length) break;
-    all=all.concat(data);
-    if(data.length<PAGE) break;
+      .eq('series', 'EQ')
+      .order('trade_date', { ascending:false })
+      .range(page*PAGE, (page+1)*PAGE-1);
+    if (error || !data?.length) break;
+    all = all.concat(data);
+    if (data.length < PAGE) break;
     page++;
   }
 
-  document.getElementById('circuitLoading').style.display='none';
-  if(!all.length){
-    ['ucRows','lcRows','bandRows','summaryRows'].forEach(id=>{
-      document.getElementById(id).innerHTML='<div style="color:var(--text3);font-size:12px">No data</div>';
+  document.getElementById('circuitLoading').style.display = 'none';
+  if (!all.length) {
+    ['ucRows','lcRows','bandRows','summaryRows'].forEach(id => {
+      document.getElementById(id).innerHTML = '<div style="color:var(--text3);font-size:12px">No data</div>';
     });
     return;
   }
-  const scope=document.getElementById('circuitScope').value;
-  circuitData=computeCircuits(all,scope);
+  const scope = document.getElementById('circuitScope').value;
+  circuitData = computeCircuits(all, scope);
   renderCircuit();
 }
 
-function computeCircuits(all, scope){
-  const data = scope==='mtf' && mtfTickers.size
+function computeCircuits(all, scope) {
+  const data = scope === 'mtf' && mtfTickers.size
     ? all.filter(r => mtfTickers.has(r.ticker))
     : all;
 
-  const dates = [...new Set(data.map(r=>r.trade_date))].sort((a,b)=>b.localeCompare(a));
+  const dates = [...new Set(data.map(r => r.trade_date))].sort((a,b) => b.localeCompare(a));
 
   const byTicker = {};
   data.forEach(r => {
-    if(!byTicker[r.ticker]) byTicker[r.ticker] = {};
-    byTicker[r.ticker][r.trade_date] = {
-      uc: isUC(r), lc: isLC(r), row: r
-    };
+    if (!byTicker[r.ticker]) byTicker[r.ticker] = {};
+    byTicker[r.ticker][r.trade_date] = { uc: isUC(r), lc: isLC(r), row: r };
   });
 
-  const ucStreaks={}, lcStreaks={};
-  Object.entries(byTicker).forEach(([t,dm])=>{
-    let us=0, ls=0;
-    for(const d of dates){
-      if(!dm[d]) break;
-      if(us===0&&ls===0){ if(dm[d].uc) us=1; else if(dm[d].lc) ls=1; else break; }
-      else if(us>0){ if(dm[d].uc) us++; else break; }
-      else if(ls>0){ if(dm[d].lc) ls++; else break; }
+  const ucStreaks = {}, lcStreaks = {};
+  Object.entries(byTicker).forEach(([t, dm]) => {
+    let us = 0, ls = 0;
+    for (const d of dates) {
+      if (!dm[d]) break;
+      if (us === 0 && ls === 0) { if (dm[d].uc) us = 1; else if (dm[d].lc) ls = 1; else break; }
+      else if (us > 0) { if (dm[d].uc) us++; else break; }
+      else if (ls > 0) { if (dm[d].lc) ls++; else break; }
     }
-    if(us>0) ucStreaks[t]=us;
-    if(ls>0) lcStreaks[t]=ls;
+    if (us > 0) ucStreaks[t] = us;
+    if (ls > 0) lcStreaks[t] = ls;
   });
 
-  const bkt=s=>s>=4?'4+':String(s);
-  const ucB={'1':[],'2':[],'3':[],'4+':[]};
-  const lcB={'1':[],'2':[],'3':[],'4+':[]};
-  Object.entries(ucStreaks).forEach(([t,s])=>{const b=bkt(s);if(ucB[b])ucB[b].push({ticker:t,streak:s});});
-  Object.entries(lcStreaks).forEach(([t,s])=>{const b=bkt(s);if(lcB[b])lcB[b].push({ticker:t,streak:s});});
+  const bkt = s => s >= 4 ? '4+' : String(s);
+  const ucB = {'1':[],'2':[],'3':[],'4+':[]};
+  const lcB = {'1':[],'2':[],'3':[],'4+':[]};
+  Object.entries(ucStreaks).forEach(([t,s]) => { const b = bkt(s); if (ucB[b]) ucB[b].push({ticker:t, streak:s}); });
+  Object.entries(lcStreaks).forEach(([t,s]) => { const b = bkt(s); if (lcB[b]) lcB[b].push({ticker:t, streak:s}); });
 
-  const ld=dates[0];
-  let lUC=0,lLC=0,lAdv=0,lDec=0;
-  data.filter(r=>r.trade_date===ld).forEach(r=>{
-    if(isUC(r)) lUC++; else if(isLC(r)) lLC++;
+  const ld = dates[0];
+  let lUC = 0, lLC = 0, lAdv = 0, lDec = 0;
+  data.filter(r => r.trade_date === ld).forEach(r => {
+    if (isUC(r)) lUC++; else if (isLC(r)) lLC++;
     const chg = r.change_pct != null ? parseFloat(r.change_pct)
-      : (r.prev_close ? (r.close-r.prev_close)/r.prev_close*100 : null);
-    if(chg != null){ if(chg>0) lAdv++; else if(chg<0) lDec++; }
+      : (r.prev_close ? (r.close - r.prev_close) / r.prev_close * 100 : null);
+    if (chg != null) { if (chg > 0) lAdv++; else if (chg < 0) lDec++; }
   });
 
-  const bandDist={};
-  [...new Set(data.map(r=>r.ticker))].forEach(t=>{
-    const b=priceBands[t]||'Unknown';
-    bandDist[b]=(bandDist[b]||0)+1;
+  const bandDist = {};
+  [...new Set(data.map(r => r.ticker))].forEach(t => {
+    const b = priceBands[t] || 'Unknown';
+    bandDist[b] = (bandDist[b] || 0) + 1;
   });
 
-  return{ucBuckets:ucB,lcBuckets:lcB,dates,latestDate:ld,latestUC:lUC,latestLC:lLC,latestAdv:lAdv,latestDec:lDec,bandDist,byTicker,data};
+  return { ucBuckets:ucB, lcBuckets:lcB, dates, latestDate:ld,
+           latestUC:lUC, latestLC:lLC, latestAdv:lAdv, latestDec:lDec,
+           bandDist, byTicker, data };
 }
 
-function renderCircuit(){
-  if(!circuitData){loadCircuitData();return;}
-  const{ucBuckets,lcBuckets,latestDate,latestUC,latestLC,latestAdv,latestDec,bandDist}=circuitData;
-  const fd=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'—';
+function renderCircuit() {
+  if (!circuitData) { loadCircuitData(); return; }
+  const { ucBuckets, lcBuckets, latestDate, latestUC, latestLC, latestAdv, latestDec, bandDist } = circuitData;
+  const fd = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}) : '—';
 
-  let uh='';
-  [['1 Day','1'],['2 Days','2'],['3 Days','3'],['4+ Days','4+']].forEach(([l,k])=>{
-    const c=ucBuckets[k]?.length||0;
-    uh+=`<div class="circuit-row"><span class="circuit-row-label">${l}</span><span class="circuit-count uc ${c?'':'zero'}" ${c?`onclick="showCircuitStocks('uc','${k}')"` :''}>${c||'—'}</span></div>`;
+  let uh = '';
+  [['1 Day','1'],['2 Days','2'],['3 Days','3'],['4+ Days','4+']].forEach(([l,k]) => {
+    const c = ucBuckets[k]?.length || 0;
+    uh += `<div class="circuit-row"><span class="circuit-row-label">${l}</span><span class="circuit-count uc ${c ? '' : 'zero'}" ${c ? `onclick="showCircuitStocks('uc','${k}')"` : ''}>${c || '—'}</span></div>`;
   });
-  document.getElementById('ucRows').innerHTML=uh;
+  document.getElementById('ucRows').innerHTML = uh;
 
-  let lh='';
-  [['1 Day','1'],['2 Days','2'],['3 Days','3'],['4+ Days','4+']].forEach(([l,k])=>{
-    const c=lcBuckets[k]?.length||0;
-    lh+=`<div class="circuit-row"><span class="circuit-row-label">${l}</span><span class="circuit-count lc ${c?'':'zero'}" ${c?`onclick="showCircuitStocks('lc','${k}')"` :''}>${c||'—'}</span></div>`;
+  let lh = '';
+  [['1 Day','1'],['2 Days','2'],['3 Days','3'],['4+ Days','4+']].forEach(([l,k]) => {
+    const c = lcBuckets[k]?.length || 0;
+    lh += `<div class="circuit-row"><span class="circuit-row-label">${l}</span><span class="circuit-count lc ${c ? '' : 'zero'}" ${c ? `onclick="showCircuitStocks('lc','${k}')"` : ''}>${c || '—'}</span></div>`;
   });
-  document.getElementById('lcRows').innerHTML=lh;
+  document.getElementById('lcRows').innerHTML = lh;
 
-  let bh='';
-  ['2','5','10','20','No Band','Unknown'].forEach(b=>{
-    const c=bandDist[b]||0; if(!c) return;
-    bh+=`<div class="circuit-row"><span class="circuit-row-label">${b==='No Band'?'No Band (F&O)':b+'% Band'}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">${c}</span></div>`;
+  let bh = '';
+  ['2','5','10','20','No Band','Unknown'].forEach(b => {
+    const c = bandDist[b] || 0; if (!c) return;
+    bh += `<div class="circuit-row"><span class="circuit-row-label">${b === 'No Band' ? 'No Band (F&O)' : b + '% Band'}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">${c}</span></div>`;
   });
-  document.getElementById('bandRows').innerHTML=bh||'<div style="color:var(--text3);font-size:12px">No band data</div>';
+  document.getElementById('bandRows').innerHTML = bh || '<div style="color:var(--text3);font-size:12px">No band data</div>';
 
-  document.getElementById('summaryRows').innerHTML=`
+  document.getElementById('summaryRows').innerHTML = `
     <div class="circuit-row"><span class="circuit-row-label">Date</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent)">${fd(latestDate)}</span></div>
-    <div class="circuit-row"><span class="circuit-row-label">Upper Circuit</span><span class="circuit-count uc">${latestUC||'—'}</span></div>
-    <div class="circuit-row"><span class="circuit-row-label">Lower Circuit</span><span class="circuit-count lc">${latestLC||'—'}</span></div>
-    <div class="circuit-row"><span class="circuit-row-label">Advancers</span><span style="color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">${latestAdv||'—'}</span></div>
-    <div class="circuit-row"><span class="circuit-row-label">Decliners</span><span style="color:var(--red);font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">${latestDec||'—'}</span></div>`;
+    <div class="circuit-row"><span class="circuit-row-label">Upper Circuit</span><span class="circuit-count uc">${latestUC || '—'}</span></div>
+    <div class="circuit-row"><span class="circuit-row-label">Lower Circuit</span><span class="circuit-count lc">${latestLC || '—'}</span></div>
+    <div class="circuit-row"><span class="circuit-row-label">Advancers</span><span style="color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">${latestAdv || '—'}</span></div>
+    <div class="circuit-row"><span class="circuit-row-label">Decliners</span><span style="color:var(--red);font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">${latestDec || '—'}</span></div>`;
 }
 
-function showCircuitStocks(type,bucket){
-  if(!circuitData) return;
-  const stocks=(type==='uc'?circuitData.ucBuckets:circuitData.lcBuckets)[bucket]||[];
-  if(!stocks.length) return;
-  const label=(type==='uc'?'🟢 Upper':'🔴 Lower')+' Circuit — '+bucket+' Day'+(bucket==='1'?'':'s');
-  document.getElementById('circuitTableTitle').textContent=label;
-  document.getElementById('circuitTableSection').style.display='block';
-  const dates=circuitData.dates;
+function showCircuitStocks(type, bucket) {
+  if (!circuitData) return;
+  const stocks = (type === 'uc' ? circuitData.ucBuckets : circuitData.lcBuckets)[bucket] || [];
+  if (!stocks.length) return;
+  const label = (type === 'uc' ? '🟢 Upper' : '🔴 Lower') + ' Circuit — ' + bucket + ' Day' + (bucket === '1' ? '' : 's');
+  document.getElementById('circuitTableTitle').textContent = label;
+  document.getElementById('circuitTableSection').style.display = 'block';
+  const dates = circuitData.dates;
 
-  currentCircuitRows=stocks.map(s=>{
-    const dm=circuitData.byTicker[s.ticker]||{};
-    const r=dm[dates[0]]?.row||{};
-    const vols=dates.slice(0,5).map(d=>dm[d]?.row?.volume||0).filter(v=>v>0);
-    const avgVol=vols.length?vols.reduce((a,b)=>a+b,0)/vols.length:0;
-    const spike=avgVol>0&&r.volume>avgVol*2;
-    const chg=r.change_pct!=null?parseFloat(r.change_pct).toFixed(2)
-      :(r.prev_close?((r.close-r.prev_close)/r.prev_close*100).toFixed(2):null);
-    return{ticker:s.ticker,band:priceBands[s.ticker]||'—',streak:s.streak,close:r.close,chgPct:chg,volume:r.volume,avgVol,spike};
-  }).sort((a,b)=>(b.spike?1:0)-(a.spike?1:0));
+  currentCircuitRows = stocks.map(s => {
+    const dm     = circuitData.byTicker[s.ticker] || {};
+    const r      = dm[dates[0]]?.row || {};
+    const vols   = dates.slice(0, 5).map(d => dm[d]?.row?.volume || 0).filter(v => v > 0);
+    const avgVol = vols.length ? vols.reduce((a,b) => a+b, 0) / vols.length : 0;
+    const spike  = avgVol > 0 && r.volume > avgVol * 2;
+    const chg    = r.change_pct != null ? parseFloat(r.change_pct).toFixed(2)
+      : (r.prev_close ? ((r.close - r.prev_close) / r.prev_close * 100).toFixed(2) : null);
+    return { ticker:s.ticker, band:priceBands[s.ticker]||'—', streak:s.streak,
+             close:r.close, chgPct:chg, volume:r.volume, avgVol, spike };
+  }).sort((a,b) => (b.spike ? 1 : 0) - (a.spike ? 1 : 0));
 
-  let html='<div class="table-wrap"><table><thead><tr><th style="text-align:left">Stock</th><th>Band</th><th>Streak</th><th>Close</th><th>Chg%</th><th>Volume</th><th>Vol vs 5d Avg</th></tr></thead><tbody>';
-  currentCircuitRows.forEach(r=>{
-    const chgCls=r.chgPct>0?'pct-pos':r.chgPct<0?'pct-neg':'pct-zero';
-    const spikeStr=r.avgVol>0?`${(r.volume/r.avgVol).toFixed(1)}x ${r.spike?'🔥':''}`:'—';
-    html+=`<tr><td>${r.ticker}</td><td>${r.band}</td><td style="color:var(--accent);font-weight:600">${r.streak}d</td><td>${r.close?r.close.toFixed(2):'—'}</td><td><span class="${chgCls}">${r.chgPct!==null?(r.chgPct>0?'+':'')+r.chgPct+'%':'—'}</span></td><td>${fmtVol(r.volume)}</td><td>${spikeStr}</td></tr>`;
+  let html = '<div class="table-wrap"><table><thead><tr><th style="text-align:left">Stock</th><th>Band</th><th>Streak</th><th>Close</th><th>Chg%</th><th>Volume</th><th>Vol vs 5d Avg</th></tr></thead><tbody>';
+  currentCircuitRows.forEach(r => {
+    const chgCls  = r.chgPct > 0 ? 'pct-pos' : r.chgPct < 0 ? 'pct-neg' : 'pct-zero';
+    const spikeStr = r.avgVol > 0 ? `${(r.volume / r.avgVol).toFixed(1)}x ${r.spike ? '🔥' : ''}` : '—';
+    html += `<tr><td>${r.ticker}</td><td>${r.band}</td><td style="color:var(--accent);font-weight:600">${r.streak}d</td><td>${r.close ? r.close.toFixed(2) : '—'}</td><td><span class="${chgCls}">${r.chgPct !== null ? (r.chgPct > 0 ? '+' : '') + r.chgPct + '%' : '—'}</span></td><td>${fmtVol(r.volume)}</td><td>${spikeStr}</td></tr>`;
   });
-  html+='</tbody></table></div>';
-  document.getElementById('circuitTableContainer').innerHTML=html;
-  document.getElementById('circuitTableSection').scrollIntoView({behavior:'smooth',block:'start'});
+  html += '</tbody></table></div>';
+  document.getElementById('circuitTableContainer').innerHTML = html;
+  document.getElementById('circuitTableSection').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
-function closeCircuitTable(){document.getElementById('circuitTableSection').style.display='none';currentCircuitRows=[];}
-function exportCircuitCSV(){
-  if(!currentCircuitRows.length) return;
-  let csv='Stock,Band,Streak,Close,ChangePct,Volume,VolVs5dAvg\n';
-  currentCircuitRows.forEach(r=>{csv+=`${r.ticker},${r.band},${r.streak},${r.close||''},${r.chgPct||''},${r.volume||''},${r.avgVol>0?(r.volume/r.avgVol).toFixed(1)+'x':''}\n`;});
-  const t=document.getElementById('circuitTableTitle').textContent.replace(/[^a-z0-9]/gi,'_');
-  triggerDownload(csv,`circuit_${t}_${new Date().toISOString().slice(0,10)}.csv`);
-  showToast('✓ CSV exported','success');
+function closeCircuitTable() { document.getElementById('circuitTableSection').style.display = 'none'; currentCircuitRows = []; }
+function exportCircuitCSV() {
+  if (!currentCircuitRows.length) return;
+  let csv = 'Stock,Band,Streak,Close,ChangePct,Volume,VolVs5dAvg\n';
+  currentCircuitRows.forEach(r => {
+    csv += `${r.ticker},${r.band},${r.streak},${r.close||''},${r.chgPct||''},${r.volume||''},${r.avgVol > 0 ? (r.volume/r.avgVol).toFixed(1)+'x' : ''}\n`;
+  });
+  const t = document.getElementById('circuitTableTitle').textContent.replace(/[^a-z0-9]/gi, '_');
+  triggerDownload(csv, `circuit_${t}_${new Date().toISOString().slice(0,10)}.csv`);
+  showToast('✓ CSV exported', 'success');
 }
 
 // ─── TABS ─────────────────────────────────────────────────────────────────────
-function switchTab(name,el){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('panel-'+name).classList.add('active');
+function switchTab(name, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
   el.classList.add('active');
-  if(name==='history') loadHistory();
-  if(name==='circuit'&&!circuitData) loadCircuitData();
+  if (name === 'history') loadHistory();
+  if (name === 'circuit' && !circuitData) loadCircuitData();
 }
 
 // ─── DRAG DROP ────────────────────────────────────────────────────────────────
-function setupDragDrop(){
-  const area=document.getElementById('uploadArea');
-  area.addEventListener('dragover',e=>{e.preventDefault();area.classList.add('drag-over');});
-  area.addEventListener('dragleave',()=>area.classList.remove('drag-over'));
-  area.addEventListener('drop',e=>{e.preventDefault();area.classList.remove('drag-over');const files=e.dataTransfer.files;if(files.length)handleBulkFiles(files);});
+function setupDragDrop() {
+  const area = document.getElementById('uploadArea');
+  area.addEventListener('dragover',  e => { e.preventDefault(); area.classList.add('drag-over'); });
+  area.addEventListener('dragleave', ()  => area.classList.remove('drag-over'));
+  area.addEventListener('drop',      e  => { e.preventDefault(); area.classList.remove('drag-over'); if (e.dataTransfer.files.length) handleBulkFiles(e.dataTransfer.files); });
 }
-function setupAuxDragDrop(id,handler){
-  const a=document.getElementById(id); if(!a) return;
-  a.addEventListener('dragover',e=>{e.preventDefault();a.classList.add('drag-over');});
-  a.addEventListener('dragleave',()=>a.classList.remove('drag-over'));
-  a.addEventListener('drop',e=>{e.preventDefault();a.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)handler(f);});
+function setupAuxDragDrop(id, handler) {
+  const a = document.getElementById(id); if (!a) return;
+  a.addEventListener('dragover',  e => { e.preventDefault(); a.classList.add('drag-over'); });
+  a.addEventListener('dragleave', ()  => a.classList.remove('drag-over'));
+  a.addEventListener('drop',      e  => { e.preventDefault(); a.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if (f) handler(f); });
 }
 
 // ─── BHAVCOPY UPLOAD ─────────────────────────────────────────────────────────
-function normalizeDate(val){
-  if(!val) return null;
-  if(/^\d{4}-\d{2}-\d{2}/.test(val)) return val.substring(0,10);
-  const m=val.match(/^(\d{1,2})[\/-](\w{3})[\/-](\d{4})$/);
-  if(m){
-    const months={jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
-    const mm=months[m[2].toLowerCase()];
-    if(mm) return m[3]+'-'+mm+'-'+m[1].padStart(2,'0');
+function normalizeDate(val) {
+  if (!val) return null;
+  if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val.substring(0, 10);
+  const m = val.match(/^(\d{1,2})[\/-](\w{3})[\/-](\d{4})$/);
+  if (m) {
+    const months = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+    const mm = months[m[2].toLowerCase()];
+    if (mm) return m[3] + '-' + mm + '-' + m[1].padStart(2,'0');
   }
   return null;
 }
 
-function parseBhavRows(rows, fields){
-  const has=(...cols)=>cols.every(c=>fields.includes(c));
+function parseBhavRows(rows, fields) {
+  const has = (...cols) => cols.every(c => fields.includes(c));
   let tradeDate, parsed;
-  if(has('TradDt','TckrSymb','SctySrs','ClsPric')){
-    tradeDate=rows[0]?.TradDt?.substring(0,10);
-    if(!tradeDate||isNaN(Date.parse(tradeDate))) throw 'Cannot parse TradDt';
-    parsed=rows.filter(r=>r.TckrSymb?.trim()&&r.ClsPric).map(r=>({
-      trade_date:tradeDate,ticker:r.TckrSymb?.trim(),series:r.SctySrs?.trim(),
-      open:parseFloat(r.OpnPric)||null,high:parseFloat(r.HghPric)||null,low:parseFloat(r.LwPric)||null,
-      close:parseFloat(r.ClsPric)||null,prev_close:parseFloat(r.PrvsClsgPric)||null,
-      volume:parseInt(r.TtlTradgVol)||null,
-    })).filter(r=>r.ticker&&r.close);
-  } else if(has('SYMBOL','SERIES','CLOSE','PREVCLOSE')){
-    tradeDate=normalizeDate(rows[0]?.TIMESTAMP||rows[0]?.DATE);
-    if(!tradeDate) throw 'Cannot parse date from TIMESTAMP';
-    parsed=rows.filter(r=>r.SYMBOL?.trim()&&r.CLOSE).map(r=>({
-      trade_date:tradeDate,ticker:r.SYMBOL?.trim().toUpperCase(),series:r.SERIES?.trim(),
-      open:parseFloat(r.OPEN)||null,high:parseFloat(r.HIGH)||null,low:parseFloat(r.LOW)||null,
-      close:parseFloat(r.CLOSE)||null,prev_close:parseFloat(r.PREVCLOSE)||null,
-      volume:parseInt(r.TOTTRDQTY||r.TOTALTRDQTY)||null,
-    })).filter(r=>r.ticker&&r.close);
+  if (has('TradDt','TckrSymb','SctySrs','ClsPric')) {
+    tradeDate = rows[0]?.TradDt?.substring(0, 10);
+    if (!tradeDate || isNaN(Date.parse(tradeDate))) throw 'Cannot parse TradDt';
+    parsed = rows.filter(r => r.TckrSymb?.trim() && r.ClsPric).map(r => ({
+      trade_date: tradeDate, ticker: r.TckrSymb?.trim(), series: r.SctySrs?.trim(),
+      open: parseFloat(r.OpnPric)||null, high: parseFloat(r.HghPric)||null,
+      low:  parseFloat(r.LwPric)||null,  close: parseFloat(r.ClsPric)||null,
+      prev_close: parseFloat(r.PrvsClsgPric)||null, volume: parseInt(r.TtlTradgVol)||null,
+    })).filter(r => r.ticker && r.close);
+  } else if (has('SYMBOL','SERIES','CLOSE','PREVCLOSE')) {
+    tradeDate = normalizeDate(rows[0]?.TIMESTAMP || rows[0]?.DATE);
+    if (!tradeDate) throw 'Cannot parse date from TIMESTAMP';
+    parsed = rows.filter(r => r.SYMBOL?.trim() && r.CLOSE).map(r => ({
+      trade_date: tradeDate, ticker: r.SYMBOL?.trim().toUpperCase(), series: r.SERIES?.trim(),
+      open: parseFloat(r.OPEN)||null, high: parseFloat(r.HIGH)||null,
+      low:  parseFloat(r.LOW)||null,  close: parseFloat(r.CLOSE)||null,
+      prev_close: parseFloat(r.PREVCLOSE)||null, volume: parseInt(r.TOTTRDQTY||r.TOTALTRDQTY)||null,
+    })).filter(r => r.ticker && r.close);
   } else {
     throw 'Unrecognized CSV format.';
   }
-  return {tradeDate, parsed};
+  return { tradeDate, parsed };
 }
 
-function parseBhavCopyCsv(file){
-  return new Promise((resolve,reject)=>{
-    Papa.parse(file,{header:true,skipEmptyLines:true,
-      complete:result=>{
+function parseBhavCopyCsv(file) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(file, { header:true, skipEmptyLines:true,
+      complete: result => {
         try {
-          const {tradeDate, parsed}=parseBhavRows(result.data, result.meta.fields||[]);
-          resolve({tradeDate, parsed, fileInfo:file.name});
+          const { tradeDate, parsed } = parseBhavRows(result.data, result.meta.fields || []);
+          resolve({ tradeDate, parsed, fileInfo: file.name });
         } catch(e) { reject(e); }
       },
-      error:e=>reject(e.message)
+      error: e => reject(e.message)
     });
   });
 }
 
-async function extractZipAndParse(file){
-  const zip=await JSZip.loadAsync(file);
-  const csvEntries=[];
-  zip.forEach((path,entry)=>{
-    if(!entry.dir && path.toLowerCase().endsWith('.csv')) csvEntries.push({path,entry});
-  });
-  if(!csvEntries.length) throw 'No CSV found inside ZIP';
-  const results=[];
-  for(const ce of csvEntries){
-    const csvText=await ce.entry.async('string');
-    const blob=new Blob([csvText],{type:'text/csv'});
-    const csvFile=new File([blob],ce.path,{type:'text/csv'});
-    try {
-      const r=await parseBhavCopyCsv(csvFile);
-      results.push(r);
-    } catch(e) {
-      results.push({tradeDate:null, parsed:[], fileInfo:ce.path, error:e});
-    }
+async function extractZipAndParse(file) {
+  const zip = await JSZip.loadAsync(file);
+  const csvEntries = [];
+  zip.forEach((path, entry) => { if (!entry.dir && path.toLowerCase().endsWith('.csv')) csvEntries.push({path, entry}); });
+  if (!csvEntries.length) throw 'No CSV found inside ZIP';
+  const results = [];
+  for (const ce of csvEntries) {
+    const csvText = await ce.entry.async('string');
+    const csvFile = new File([new Blob([csvText], {type:'text/csv'})], ce.path, {type:'text/csv'});
+    try { results.push(await parseBhavCopyCsv(csvFile)); }
+    catch(e) { results.push({ tradeDate:null, parsed:[], fileInfo:ce.path, error:e }); }
   }
   return results;
 }
 
-function handleFile(file){
-  if(!file?.name.endsWith('.csv')){showToast('Need .csv or .zip','error');return;}
-  clearStatus(); addStatus('info','📄 '+file.name);
-  Papa.parse(file,{header:true,skipEmptyLines:true,complete:r=>validateAndPrepare(r),error:e=>addStatus('err','✗ '+e.message)});
-}
-
-function validateAndPrepare(result){
-  const rows=result.data, fields=result.meta.fields||[];
+function validateAndPrepare(result) {
+  const rows = result.data, fields = result.meta.fields || [];
   try {
-    const {tradeDate, parsed}=parseBhavRows(rows, fields);
-    addStatus('ok','✓ Columns validated');
-    addStatus('ok','✓ Trade date: '+tradeDate);
-    const sc={};parsed.forEach(r=>{sc[r.series]=(sc[r.series]||0)+1;});
-    addStatus('ok','✓ Series: '+Object.entries(sc).sort((a,b)=>b[1]-a[1]).map(([s,c])=>s+':'+c).join(' | '));
-    parsedRows=parsed;
-    addStatus('ok','✓ Ready: '+parsedRows.length+' rows');
-    addStatus('warn','  ⚠ Duplicates auto-skipped');
-    document.getElementById('uploadBtn').disabled=false;
-  } catch(e) {
-    addStatus('err','✗ '+e);
-  }
+    const { tradeDate, parsed } = parseBhavRows(rows, fields);
+    addStatus('ok', '✓ Columns validated');
+    addStatus('ok', '✓ Trade date: ' + tradeDate);
+    const sc = {}; parsed.forEach(r => { sc[r.series] = (sc[r.series]||0) + 1; });
+    addStatus('ok', '✓ Series: ' + Object.entries(sc).sort((a,b)=>b[1]-a[1]).map(([s,c])=>s+':'+c).join(' | '));
+    parsedRows = parsed;
+    addStatus('ok',   '✓ Ready: ' + parsedRows.length + ' rows');
+    addStatus('warn', '  ⚠ Duplicates auto-skipped');
+    document.getElementById('uploadBtn').disabled = false;
+  } catch(e) { addStatus('err', '✗ ' + e); }
 }
 
-async function handleBulkFiles(fileList){
-  const files=[...fileList];
-  if(!files.length) return;
+async function handleBulkFiles(fileList) {
+  const files = [...fileList]; if (!files.length) return;
   clearStatus(); showProgress(0);
 
-  if(files.length===1 && files[0].name.toLowerCase().endsWith('.csv')){
-    addStatus('info','📄 '+files[0].name);
-    Papa.parse(files[0],{header:true,skipEmptyLines:true,complete:r=>validateAndPrepare(r),error:e=>addStatus('err','✗ '+e.message)});
+  if (files.length === 1 && files[0].name.toLowerCase().endsWith('.csv')) {
+    addStatus('info', '📄 ' + files[0].name);
+    Papa.parse(files[0], { header:true, skipEmptyLines:true, complete: r => validateAndPrepare(r), error: e => addStatus('err', '✗ ' + e.message) });
     return;
   }
 
-  addStatus('info','📄 Processing '+files.length+' file(s)...');
-  document.getElementById('uploadBtn').disabled=true;
+  addStatus('info', '📄 Processing ' + files.length + ' file(s)...');
+  document.getElementById('uploadBtn').disabled = true;
+  const allRows = []; let fileErrors = 0, csvCount = 0;
 
-  const allRows=[];
-  let fileErrors=0, csvCount=0;
-
-  for(let fi=0;fi<files.length;fi++){
-    const file=files[fi];
-    const isZip=file.name.toLowerCase().endsWith('.zip');
-    showProgress(Math.round((fi/files.length)*80));
+  for (let fi = 0; fi < files.length; fi++) {
+    const file = files[fi];
+    showProgress(Math.round((fi / files.length) * 80));
     try {
-      if(isZip){
-        const results=await extractZipAndParse(file);
-        let zipOk=0, zipErr=0;
-        for(const r of results){
+      if (file.name.toLowerCase().endsWith('.zip')) {
+        const results = await extractZipAndParse(file);
+        let zipOk = 0, zipErr = 0;
+        for (const r of results) {
           csvCount++;
-          if(r.error){ zipErr++; addStatus('err','✗ ['+csvCount+'] '+r.fileInfo+' — '+r.error); }
-          else { zipOk++; allRows.push(...r.parsed); addStatus('ok','✓ ['+csvCount+'] '+r.fileInfo+' → '+r.tradeDate+' ('+r.parsed.length+' rows)'); }
+          if (r.error) { zipErr++; addStatus('err', `✗ [${csvCount}] ${r.fileInfo} — ${r.error}`); }
+          else { zipOk++; allRows.push(...r.parsed); addStatus('ok', `✓ [${csvCount}] ${r.fileInfo} → ${r.tradeDate} (${r.parsed.length} rows)`); }
         }
-        if(zipOk) addStatus('ok','📁 '+file.name+': '+zipOk+'/'+results.length+' CSV(s) OK');
-        if(zipErr) addStatus('warn','  ⚠ '+zipErr+' CSV(s) failed in '+file.name);
+        if (zipOk)  addStatus('ok',   `📁 ${file.name}: ${zipOk}/${results.length} CSV(s) OK`);
+        if (zipErr) addStatus('warn', `  ⚠ ${zipErr} CSV(s) failed`);
       } else {
         csvCount++;
-        const result=await parseBhavCopyCsv(file);
+        const result = await parseBhavCopyCsv(file);
         allRows.push(...result.parsed);
-        addStatus('ok','✓ ['+csvCount+'] '+file.name+' → '+result.tradeDate+' ('+result.parsed.length+' rows)');
+        addStatus('ok', `✓ [${csvCount}] ${file.name} → ${result.tradeDate} (${result.parsed.length} rows)`);
       }
-    } catch(e) {
-      fileErrors++;
-      addStatus('err','✗ '+file.name+' — '+e);
-    }
+    } catch(e) { fileErrors++; addStatus('err', `✗ ${file.name} — ${e}`); }
   }
 
-  if(!allRows.length){addStatus('err','✗ No rows to upload');showProgress(0);return;}
-  addStatus('ok','✓ Total: '+allRows.length+' rows from '+csvCount+' CSV(s)');
-  if(fileErrors) addStatus('warn','  ⚠ '+fileErrors+' file(s) had errors');
+  if (!allRows.length) { addStatus('err', '✗ No rows to upload'); showProgress(0); return; }
+  addStatus('ok',  `✓ Total: ${allRows.length} rows from ${csvCount} CSV(s)`);
+  if (fileErrors) addStatus('warn', `  ⚠ ${fileErrors} file(s) had errors`);
 
-  addStatus('info','⏳ Uploading to Supabase...');
-  const BATCH=500; let done=0;
-  for(let i=0;i<allRows.length;i+=BATCH){
-    const {error}=await sb.from(TABLE).upsert(allRows.slice(i,i+BATCH),{onConflict:'trade_date,ticker,series',ignoreDuplicates:true});
-    if(error){addStatus('err','✗ Upload error: '+error.message);showProgress(0);return;}
-    done+=BATCH; showProgress(80+Math.min(20,Math.round(done/allRows.length*20)));
+  addStatus('info', '⏳ Uploading to Supabase...');
+  const BATCH = 500; let done = 0;
+  for (let i = 0; i < allRows.length; i += BATCH) {
+    const { error } = await sb.from(TABLE).upsert(allRows.slice(i, i+BATCH), { onConflict:'trade_date,ticker,series', ignoreDuplicates:true });
+    if (error) { addStatus('err', '✗ Upload error: ' + error.message); showProgress(0); return; }
+    done += BATCH; showProgress(80 + Math.min(20, Math.round(done / allRows.length * 20)));
   }
   showProgress(100);
-  addStatus('ok','✓ Upload complete! '+allRows.length+' rows');
-  showToast('✓ Uploaded '+allRows.length+' rows from '+csvCount+' CSV(s)','success');
-  circuitData=null; await Promise.all([loadData(),loadHistory()]);
+  addStatus('ok', `✓ Upload complete! ${allRows.length} rows`);
+  showToast(`✓ Uploaded ${allRows.length} rows from ${csvCount} CSV(s)`, 'success');
+  circuitData = null;
+  await Promise.all([loadData(), loadHistory()]);
 }
 
-async function uploadData(){
-  if(!parsedRows.length) return;
-  document.getElementById('uploadBtn').disabled=true;
+async function uploadData() {
+  if (!parsedRows.length) return;
+  document.getElementById('uploadBtn').disabled = true;
   showProgress(0);
-  const BATCH=500; let done=0;
-  for(let i=0;i<parsedRows.length;i+=BATCH){
-    const {error}=await sb.from(TABLE).upsert(parsedRows.slice(i,i+BATCH),{onConflict:'trade_date,ticker,series',ignoreDuplicates:true});
-    if(error){addStatus('err','✗ '+error.message);document.getElementById('uploadBtn').disabled=false;return;}
-    done+=BATCH; showProgress(Math.min(100,Math.round(done/parsedRows.length*100)));
+  const BATCH = 500; let done = 0;
+  for (let i = 0; i < parsedRows.length; i += BATCH) {
+    const { error } = await sb.from(TABLE).upsert(parsedRows.slice(i, i+BATCH), { onConflict:'trade_date,ticker,series', ignoreDuplicates:true });
+    if (error) { addStatus('err', '✗ ' + error.message); document.getElementById('uploadBtn').disabled = false; return; }
+    done += BATCH; showProgress(Math.min(100, Math.round(done / parsedRows.length * 100)));
   }
   showProgress(100);
-  addStatus('ok','✓ Upload complete! '+parsedRows.length+' rows');
-  showToast('✓ BhavCopy uploaded','success');
-  parsedRows=[]; document.getElementById('uploadBtn').disabled=true;
-  circuitData=null; await Promise.all([loadData(),loadHistory()]);
+  addStatus('ok', `✓ Upload complete! ${parsedRows.length} rows`);
+  showToast('✓ BhavCopy uploaded', 'success');
+  parsedRows = []; document.getElementById('uploadBtn').disabled = true;
+  circuitData = null;
+  await Promise.all([loadData(), loadHistory()]);
 }
 
-// ─── LOAD DATA (FIXED: 7-DAY DEFAULT AND OPTIMIZED LOAD SPEED) ────────────────
-function onViewChange(){
-  const v=document.getElementById('filterView').value;
-  document.getElementById('watchlistGroup').style.display=v==='watchlist'?'':'none';
+// ─── LOAD DATA ────────────────────────────────────────────────────────────────
+function onViewChange() {
+  const v = document.getElementById('filterView').value;
+  document.getElementById('watchlistGroup').style.display = v === 'watchlist' ? '' : 'none';
   loadData();
 }
 
-async function loadData(){
+async function loadData() {
   const from   = document.getElementById('filterFrom')?.value;
   const to     = document.getElementById('filterTo')?.value;
-  const series = document.getElementById('filterSeries')?.value||'EQ';
-  const view   = document.getElementById('filterView')?.value||'mtf';
-  const wlRaw  = document.getElementById('watchlistInput')?.value||'';
-  const wl     = wlRaw.split(/[\n,]+/).map(s=>s.trim().toUpperCase()).filter(Boolean);
+  const series = document.getElementById('filterSeries')?.value || 'EQ';
+  const view   = document.getElementById('filterView')?.value   || 'mtf';
+  const wlRaw  = document.getElementById('watchlistInput')?.value || '';
+  const wl     = wlRaw.split(/[\n,]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
 
-  let watchlistTickers = new Set();
-  if(view==='watchlist'){
-    wl.forEach(s=>{
-      if(mtfIsinMap[s]) watchlistTickers.add(mtfIsinMap[s]);
-      else watchlistTickers.add(s);
-    });
+  // Resolve watchlist ISINs → tickers
+  const watchlistTickers = new Set();
+  if (view === 'watchlist') {
+    wl.forEach(s => watchlistTickers.add(mtfIsinMap[s] || s));
   }
 
-  if(view==='mtf' && !mtfTickers.size){
-    document.getElementById('tableContainer').innerHTML='<div class="empty-state"><div class="e-icon">📋</div><p>No MTF list uploaded yet. Go to <b>Upload</b> tab.</p></div>';
-    document.getElementById('tableMeta').textContent=''; return;
+  // MTF requires list to be loaded
+  if (view === 'mtf' && !mtfTickers.size) {
+    document.getElementById('tableContainer').innerHTML = '<div class="empty-state"><div class="e-icon">📋</div><p>No MTF list uploaded yet. Go to <b>Upload</b> tab.</p></div>';
+    document.getElementById('tableMeta').textContent = ''; return;
   }
 
-  document.getElementById('tableContainer').innerHTML=`<div id="tableSkeleton">
+  // All Stocks guard — must have explicit date range to avoid massive egress
+  if (view === 'all' && (!from || !to)) {
+    document.getElementById('tableContainer').innerHTML = '<div class="empty-state"><div class="e-icon">⚠️</div><p>Please select a <b>From</b> and <b>To</b> date before loading All Stocks.</p></div>';
+    document.getElementById('tableMeta').textContent = ''; return;
+  }
+
+  document.getElementById('tableContainer').innerHTML = `
     <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div>
-    <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div></div>`;
+    <div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div>`;
 
-  let fromDate=from, toDate=to;
-
-  // FIX: Properly extract the last 7 distinct trade dates rather than using arbitrary row count limits
-  if(!fromDate && !toDate){
-    const {data: distinctDates, error: dateError} = await sb.rpc('get_distinct_dates', { 
-      series_param: series === 'ALL' ? 'EQ' : series, 
-      limit_param: DEFAULT_DAYS 
-    });
-
-    if(!dateError && distinctDates && distinctDates.length) {
-      const sortedDates = distinctDates.map(d => d.trade_date).sort((a,b)=>b.localeCompare(a));
-      toDate = sortedDates[0];
-      fromDate = sortedDates[sortedDates.length - 1];
-    } else {
-      // Fallback inside JavaScript if RPC routine hasn't been compiled/deployed to Supabase dashboard yet
-      const {data:dts} = await sb.from(TABLE)
-        .select('trade_date')
-        .eq('series', series==='ALL'?'EQ':series)
-        .order('trade_date',{ascending:false})
-        .limit(4000); 
-      if(dts?.length){
-        const uniq=[...new Set(dts.map(r=>r.trade_date))].sort((a,b)=>b.localeCompare(a));
-        const last=uniq.slice(0, DEFAULT_DAYS);
-        if(last.length){ fromDate=last[last.length-1]; toDate=last[0]; }
+  // ── Auto date range ──
+  // Uses a single-ticker probe query — tiny fetch, just discovers available dates
+  let fromDate = from, toDate = to;
+  if (!fromDate && !toDate) {
+    const probeTicker = view === 'mtf' && mtfTickers.size ? [...mtfTickers][0] : null;
+    let probeQ = sb.from(TABLE)
+      .select('trade_date')
+      .eq('series', series === 'ALL' ? 'EQ' : series)
+      .order('trade_date', { ascending:false })
+      .limit(DEFAULT_DAYS * 3);  // fetch 21 rows max, get ~7 distinct dates
+    if (probeTicker) probeQ = probeQ.eq('ticker', probeTicker);
+    const { data: dts } = await probeQ;
+    if (dts?.length) {
+      const uniq = [...new Set(dts.map(r => r.trade_date))].sort((a,b) => b.localeCompare(a));
+      const last = uniq.slice(0, DEFAULT_DAYS);
+      if (last.length) {
+        fromDate = last[last.length - 1];
+        toDate   = last[0];
+        // Write back so user sees the auto-selected range in the date inputs
+        const fromEl = document.getElementById('filterFrom');
+        const toEl   = document.getElementById('filterTo');
+        if (fromEl && !fromEl.value) fromEl.value = fromDate;
+        if (toEl   && !toEl.value)   toEl.value   = toDate;
       }
     }
   }
 
-  // OPTIMIZATION: Filter payload query parameters at the database layer if 'mtf' or 'watchlist' views are scoped
-  let all=[], page=0, PAGE=2000;
-  while(true){
+  // ── Fetch rows — NO ticker IN clause (avoids Supabase URL length limit with 1500+ tickers) ──
+  // Filter by MTF / watchlist in JS after fetch
+  const PAGE = 1000; let all = [], page = 0;
+  while (true) {
     let q = sb.from(TABLE)
       .select('trade_date,ticker,close,high,low,prev_close,change_pct,volume')
-      .order('trade_date',{ascending:false});
-    
-    if(series!=='ALL') q=q.eq('series',series);
-    if(fromDate) q=q.gte('trade_date',fromDate);
-    if(toDate)   q=q.lte('trade_date',toDate);
-    
-    if(view==='mtf' && mtfTickers.size < 200) {
-      q = q.in('ticker', [...mtfTickers]);
-    } else if(view==='watchlist' && watchlistTickers.size > 0) {
-      q = q.in('ticker', [...watchlistTickers]);
-    }
-    
-    q=q.range(page*PAGE,(page+1)*PAGE-1);
-    const {data,error}=await q;
-    if(error){showToast('Load error: '+error.message,'error');return;}
-    if(!data?.length) break;
-    all=all.concat(data);
-    if(data.length<PAGE) break;
+      .order('trade_date', { ascending:false })
+      .order('ticker');
+    if (series !== 'ALL') q = q.eq('series', series);
+    if (fromDate) q = q.gte('trade_date', fromDate);
+    if (toDate)   q = q.lte('trade_date', toDate);
+    q = q.range(page * PAGE, (page+1) * PAGE - 1);
+    const { data, error } = await q;
+    if (error) { showToast('Load error: ' + error.message, 'error'); return; }
+    if (!data?.length) break;
+    all = all.concat(data);
+    if (data.length < PAGE) break;
     page++;
   }
 
+  // ── Filter by view in JS ──
   let filtered = all;
-  if(view==='mtf'){
+  if (view === 'mtf') {
     filtered = all.filter(r => mtfTickers.has(r.ticker));
-  } else if(view==='watchlist' && watchlistTickers.size){
+  } else if (view === 'watchlist' && watchlistTickers.size) {
     filtered = all.filter(r => watchlistTickers.has(r.ticker));
   }
 
-  if(!filtered.length){
-    document.getElementById('tableContainer').innerHTML='<div class="empty-state"><div class="e-icon">📂</div><p>No data found for this date range.</p></div>';
-    updateStats([],[],{},{});
+  if (!filtered.length) {
+    document.getElementById('tableContainer').innerHTML = '<div class="empty-state"><div class="e-icon">📂</div><p>No data for selected range.</p></div>';
+    updateStats([], [], {}, {});
     return;
   }
 
-  const dates  = [...new Set(filtered.map(r=>r.trade_date))].sort((a,b)=>b.localeCompare(a));
-  const stocks = [...new Set(filtered.map(r=>r.ticker))].sort();
+  // ── All trading days found in range ──
+  const allDates  = [...new Set(filtered.map(r => r.trade_date))].sort((a,b) => b.localeCompare(a));
+  const totalFound = allDates.length;
 
-  const grid={}, ohlcGrid={}, volGrid={};
-  filtered.forEach(r=>{
-    if(!grid[r.ticker])    grid[r.ticker]={};
-    if(!ohlcGrid[r.ticker]) ohlcGrid[r.ticker]={};
-    if(!volGrid[r.ticker]) volGrid[r.ticker]={};
-    grid[r.ticker][r.trade_date]    = r.change_pct;
-    volGrid[r.ticker][r.trade_date] = r.volume;
+  // ── Cap to MAX_COL_DAYS — take latest N trading days only ──
+  const dates    = allDates.slice(0, MAX_COL_DAYS);
+  const wasCapped = totalFound > MAX_COL_DAYS;
+
+  // Filter rows to only the capped dates (saves memory and rendering time)
+  const dateSet  = new Set(dates);
+  const capped   = filtered.filter(r => dateSet.has(r.trade_date));
+
+  const stocks = [...new Set(capped.map(r => r.ticker))].sort();
+
+  const grid = {}, ohlcGrid = {}, volGrid = {};
+  capped.forEach(r => {
+    if (!grid[r.ticker])     grid[r.ticker]     = {};
+    if (!ohlcGrid[r.ticker]) ohlcGrid[r.ticker] = {};
+    if (!volGrid[r.ticker])  volGrid[r.ticker]  = {};
+    grid[r.ticker][r.trade_date]     = r.change_pct;
+    volGrid[r.ticker][r.trade_date]  = r.volume;
     ohlcGrid[r.ticker][r.trade_date] = r;
   });
 
-  tableData={dates,stocks,grid,ohlcGrid,volGrid};
-  renderTable(dates,stocks,grid,ohlcGrid,volGrid);
-  updateStats(dates,stocks,grid,volGrid);
+  tableData = { dates, stocks, grid, ohlcGrid, volGrid };
+  renderTable(dates, stocks, grid, ohlcGrid, volGrid);
+  updateStats(dates, stocks, grid, volGrid);
+
+  // ── Meta line — show cap notice if range was trimmed ──
+  const metaEl = document.getElementById('tableMeta');
+  if (wasCapped) {
+    metaEl.innerHTML = `${stocks.length} stocks &times; ${dates.length} days`
+      + `<span style="color:var(--warn);margin-left:8px">⚠ Showing latest ${MAX_COL_DAYS} of ${totalFound} trading days in range</span>`;
+  } else {
+    metaEl.textContent = `${stocks.length} stocks × ${dates.length} days`;
+  }
 }
 
-// ─── STREAK COMPUTATION ────────────────
-function computeStreak(ticker, dates, ohlcGrid){
-  if(!dates.length) return {ucConsec:0,lcConsec:0,ucWin:0,lcWin:0,reversal:null};
+// ─── STREAK COMPUTATION (OHLC-based, unified with Circuit tab) ────────────────
+function computeStreak(ticker, dates, ohlcGrid) {
+  if (!dates.length) return { ucConsec:0, lcConsec:0, ucWin:0, lcWin:0, reversal:null };
   const getRow = d => ohlcGrid[ticker]?.[d] || null;
 
+  // Reversal: latest day flipped vs previous available trading day
   let reversal = null;
-  if(dates.length >= 2){
-    const r0 = getRow(dates[0]); 
-    const r1 = getRow(dates[1]); 
-    if(r0 && r1){
-      const d0uc=isUC(r0), d0lc=isLC(r0);
-      const d1uc=isUC(r1), d1lc=isLC(r1);
-      if(d0uc && d1lc) reversal='up';   
-      else if(d0lc && d1uc) reversal='dn'; 
+  if (dates.length >= 2) {
+    const r0 = getRow(dates[0]);
+    const r1 = getRow(dates[1]);
+    if (r0 && r1) {
+      if      (isUC(r0) && isLC(r1)) reversal = 'up';  // was LC, now UC
+      else if (isLC(r0) && isUC(r1)) reversal = 'dn';  // was UC, now LC
     }
   }
 
-  let ucConsec=0, lcConsec=0;
-  for(const d of dates){
-    const r=getRow(d);
-    if(!r) break;
-    const uc=isUC(r), lc=isLC(r);
-    if(ucConsec===0 && lcConsec===0){
-      if(uc) ucConsec=1; else if(lc) lcConsec=1; else break;
-    } else if(ucConsec>0){ if(uc) ucConsec++; else break; }
-    else if(lcConsec>0){ if(lc) lcConsec++; else break; }
+  // Consecutive streak from latest day
+  let ucConsec = 0, lcConsec = 0;
+  for (const d of dates) {
+    const r = getRow(d); if (!r) break;
+    const uc = isUC(r), lc = isLC(r);
+    if (ucConsec === 0 && lcConsec === 0) { if (uc) ucConsec = 1; else if (lc) lcConsec = 1; else break; }
+    else if (ucConsec > 0) { if (uc) ucConsec++; else break; }
+    else if (lcConsec > 0) { if (lc) lcConsec++; else break; }
   }
 
-  let ucWin=0, lcWin=0;
-  dates.forEach(d=>{
-    const r=getRow(d); if(!r) return;
-    if(isUC(r)) ucWin++;
-    else if(isLC(r)) lcWin++;
+  // Window hits across all visible dates
+  let ucWin = 0, lcWin = 0;
+  dates.forEach(d => {
+    const r = getRow(d); if (!r) return;
+    if (isUC(r)) ucWin++; else if (isLC(r)) lcWin++;
   });
 
-  return{ucConsec,lcConsec,ucWin,lcWin,reversal};
+  return { ucConsec, lcConsec, ucWin, lcWin, reversal };
 }
 
-function fmtStreak(ucConsec, lcConsec, ucWin, lcWin, reversal){
-  if(reversal==='up') return `<span class="streak streak-rev-up">↕ Rev↑</span>`;
-  if(reversal==='dn') return `<span class="streak streak-rev-dn">↕ Rev↓</span>`;
-
-  if(ucConsec>=2){
-    const label=ucConsec>=4?'4d+↑':`${ucConsec}d↑`;
-    return `<span class="streak streak-uc-c">${label}</span>`;
-  }
-  if(lcConsec>=2){
-    const label=lcConsec>=4?'4d+↓':`${lcConsec}d↓`;
-    return `<span class="streak streak-lc-c">${label}</span>`;
-  }
-  if(ucConsec===1) return `<span class="streak streak-uc-c">1d↑</span>`;
-  if(lcConsec===1) return `<span class="streak streak-lc-c">1d↓</span>`;
-
-  if(ucWin>=3) return `<span class="streak streak-uc-w">2w+↑</span>`;
-  if(ucWin===2) return `<span class="streak streak-uc-w">2w↑</span>`;
-  if(ucWin===1) return `<span class="streak streak-uc-w">1w↑</span>`;
-  if(lcWin>=3)  return `<span class="streak streak-lc-w">2w+↓</span>`;
-  if(lcWin===2) return `<span class="streak streak-lc-w">2w↓</span>`;
-  if(lcWin===1) return `<span class="streak streak-lc-w">1w↓</span>`;
-
+function fmtStreak(ucConsec, lcConsec, ucWin, lcWin, reversal) {
+  // Priority 1 — Reversal (most informative signal)
+  if (reversal === 'up') return `<span class="streak streak-rev-up">↕ Rev↑</span>`;
+  if (reversal === 'dn') return `<span class="streak streak-rev-dn">↕ Rev↓</span>`;
+  // Priority 2 — Consecutive streak
+  if (ucConsec >= 2) return `<span class="streak streak-uc-c">${ucConsec >= 4 ? '4d+↑' : ucConsec + 'd↑'}</span>`;
+  if (lcConsec >= 2) return `<span class="streak streak-lc-c">${lcConsec >= 4 ? '4d+↓' : lcConsec + 'd↓'}</span>`;
+  if (ucConsec === 1) return `<span class="streak streak-uc-c">1d↑</span>`;
+  if (lcConsec === 1) return `<span class="streak streak-lc-c">1d↓</span>`;
+  // Priority 3 — Window hits
+  if (ucWin >= 3) return `<span class="streak streak-uc-w">2w+↑</span>`;
+  if (ucWin === 2) return `<span class="streak streak-uc-w">2w↑</span>`;
+  if (ucWin === 1) return `<span class="streak streak-uc-w">1w↑</span>`;
+  if (lcWin >= 3)  return `<span class="streak streak-lc-w">2w+↓</span>`;
+  if (lcWin === 2) return `<span class="streak streak-lc-w">2w↓</span>`;
+  if (lcWin === 1) return `<span class="streak streak-lc-w">1w↓</span>`;
   return `<span class="streak-none">—</span>`;
 }
 
 // ─── RENDER TABLE ─────────────────────────────────────────────────────────────
-function renderTable(dates, stocks, grid, ohlcGrid, volGrid){
-  const fmt=d=>new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
-  const fmtPct=(v,isNA)=>{
-    if(isNA) return '<span class="pct-null">NA</span>';
-    if(v===null||v===undefined) return '<span class="pct-null">—</span>';
-    const n=parseFloat(v);
-    const cls=n>0?'pct-pos':n<0?'pct-neg':'pct-zero';
-    return `<span class="${cls}">${n>0?'+':''}${n.toFixed(2)}%</span>`;
+function renderTable(dates, stocks, grid, ohlcGrid, volGrid) {
+  const fmt    = d => new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day:'2-digit', month:'short' });
+  const fmtPct = (v, isNA) => {
+    if (isNA) return '<span class="pct-null">NA</span>';
+    if (v === null || v === undefined) return '<span class="pct-null">—</span>';
+    const n   = parseFloat(v);
+    const cls = n > 0 ? 'pct-pos' : n < 0 ? 'pct-neg' : 'pct-zero';
+    return `<span class="${cls}">${n > 0 ? '+' : ''}${n.toFixed(2)}%</span>`;
   };
 
-  const datesWithData = new Set(stocks.flatMap(t => Object.keys(grid[t]||{})));
+  const datesWithData = new Set(stocks.flatMap(t => Object.keys(grid[t] || {})));
 
-  let html='<div class="table-wrap"><table><thead><tr><th>Stock</th><th>Streak</th><th>Band</th>';
-  dates.forEach(d=>html+=`<th>${fmt(d)}</th>`);
-  html+='</tr></thead><tbody>';
+  let html = '<div class="table-wrap"><table><thead><tr><th>Stock</th><th>Streak</th><th>Band</th>';
+  dates.forEach(d => html += `<th>${fmt(d)}</th>`);
+  html += '</tr></thead><tbody>';
 
-  stocks.forEach(t=>{
-    const {ucConsec,lcConsec,ucWin,lcWin,reversal}=computeStreak(t,dates,ohlcGrid);
-    const streakHtml=fmtStreak(ucConsec,lcConsec,ucWin,lcWin,reversal);
-    const band=priceBands[t]||'—';
-    const bandStyle=band==='No Band'?'color:var(--text3)':band==='—'?'color:var(--text3)':'color:var(--text2)';
-    html+=`<tr><td>${t}</td><td>${streakHtml}</td><td style="font-size:10px;${bandStyle}">${band==='No Band'?'F&O':band==='—'?'—':band+'%'}</td>`;
-    dates.forEach(d=>{
-      const v=grid[t]?.[d];
-      const vol=volGrid[t]?.[d];
-      const isNA = v===undefined && datesWithData.has(d);
-      const pctHtml=fmtPct(v,isNA);
-      const volHtml=vol?`<span class="vol-sub">${fmtVol(vol)}</span>`:'';
-      html+=`<td>${pctHtml}${volHtml}</td>`;
+  stocks.forEach(t => {
+    const { ucConsec, lcConsec, ucWin, lcWin, reversal } = computeStreak(t, dates, ohlcGrid);
+    const streakHtml = fmtStreak(ucConsec, lcConsec, ucWin, lcWin, reversal);
+    const band       = priceBands[t] || '—';
+    const bandStyle  = (band === 'No Band' || band === '—') ? 'color:var(--text3)' : 'color:var(--text2)';
+    const bandLabel  = band === 'No Band' ? 'F&O' : band === '—' ? '—' : band + '%';
+    html += `<tr><td>${t}</td><td>${streakHtml}</td><td style="font-size:10px;${bandStyle}">${bandLabel}</td>`;
+    dates.forEach(d => {
+      const v    = grid[t]?.[d];
+      const vol  = volGrid[t]?.[d];
+      const isNA = v === undefined && datesWithData.has(d);
+      html += `<td>${fmtPct(v, isNA)}${vol ? `<span class="vol-sub">${fmtVol(vol)}</span>` : ''}</td>`;
     });
-    html+='</tr>';
+    html += '</tr>';
   });
-  html+='</tbody></table></div>';
-  document.getElementById('tableContainer').innerHTML=html;
-  document.getElementById('tableMeta').textContent=`${stocks.length} stocks × ${dates.length} days`;
+  html += '</tbody></table></div>';
+  document.getElementById('tableContainer').innerHTML = html;
+  // NOTE: do NOT set tableMeta here — it is set in loadData() after cap notice logic
 }
 
-function updateStats(dates,stocks,grid,volGrid){
-  document.getElementById('statStocks').textContent=stocks.length||'—';
-  document.getElementById('statDays').textContent=dates.length||'—';
-  document.getElementById('statLastDate').textContent=dates[0]?new Date(dates[0]+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'—';
-  if(dates[0]&&stocks.length){
-    let adv=0,dec=0;
-    stocks.forEach(t=>{const v=parseFloat(grid[t]?.[dates[0]]);if(!isNaN(v)){if(v>0)adv++;else if(v<0)dec++;}});
-    document.getElementById('statAdv').textContent=adv||'—';
-    document.getElementById('statDec').textContent=dec||'—';
+function updateStats(dates, stocks, grid, volGrid) {
+  document.getElementById('statStocks').textContent   = stocks.length || '—';
+  document.getElementById('statDays').textContent     = dates.length  || '—';
+  document.getElementById('statLastDate').textContent = dates[0]
+    ? new Date(dates[0] + 'T00:00:00').toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'})
+    : '—';
+  if (dates[0] && stocks.length) {
+    let adv = 0, dec = 0;
+    stocks.forEach(t => {
+      const v = parseFloat(grid[t]?.[dates[0]]);
+      if (!isNaN(v)) { if (v > 0) adv++; else if (v < 0) dec++; }
+    });
+    document.getElementById('statAdv').textContent = adv || '—';
+    document.getElementById('statDec').textContent = dec || '—';
   }
-  document.getElementById('statMtf').textContent=mtfTickers.size||'—';
-  document.getElementById('statBands').textContent=Object.keys(priceBands).length||'—';
+  document.getElementById('statMtf').textContent   = mtfTickers.size                  || '—';
+  document.getElementById('statBands').textContent = Object.keys(priceBands).length   || '—';
 }
 
 // ─── HISTORY ──────────────────────────────────────────────────────────────────
-async function loadHistory(){
-  const PAGE=1000; let all=[],page=0;
-  while(true){
-    const {data,error}=await sb.from(TABLE).select('trade_date').order('trade_date',{ascending:false}).range(page*PAGE,(page+1)*PAGE-1);
-    if(error||!data?.length) break; all=all.concat(data); if(data.length<PAGE) break; page++;
+async function loadHistory() {
+  const PAGE = 1000; let all = [], page = 0;
+  while (true) {
+    const { data, error } = await sb.from(TABLE).select('trade_date').order('trade_date', { ascending:false }).range(page*PAGE, (page+1)*PAGE-1);
+    if (error || !data?.length) break; all = all.concat(data); if (data.length < PAGE) break; page++;
   }
-  if(!all.length){document.getElementById('calendarWrap').innerHTML='<div class="empty-state"><div class="e-icon">📁</div><p>No uploads yet</p></div>';return;}
-  const counts={};
-  all.forEach(r=>{counts[r.trade_date]=(counts[r.trade_date]||0)+1;});
-  _historyCounts=counts; _historyMaxCount=Math.max(...Object.values(counts));
-  const uploaded=Object.keys(counts);
-  const total=uploaded.length;
-  const years=[...new Set(uploaded.map(d=>d.slice(0,4)))].sort((a,b)=>b-a);
-  _historyYears=years;
-  const sel=document.getElementById('calYearSelect');
-  sel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');
-  sel.value=years[0];
-  document.getElementById('historyMeta').textContent=`${total} day${total!==1?'s':''} across ${years.length} year${years.length!==1?'s':''}`;
+  if (!all.length) { document.getElementById('calendarWrap').innerHTML = '<div class="empty-state"><div class="e-icon">📁</div><p>No uploads yet</p></div>'; return; }
+  const counts = {};
+  all.forEach(r => { counts[r.trade_date] = (counts[r.trade_date] || 0) + 1; });
+  _historyCounts = counts; _historyMaxCount = Math.max(...Object.values(counts));
+  const uploaded = Object.keys(counts);
+  const total    = uploaded.length;
+  const years    = [...new Set(uploaded.map(d => d.slice(0,4)))].sort((a,b) => b - a);
+  _historyYears  = years;
+  const sel = document.getElementById('calYearSelect');
+  sel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+  sel.value = years[0];
+  document.getElementById('historyMeta').textContent = `${total} day${total !== 1 ? 's' : ''} across ${years.length} year${years.length !== 1 ? 's' : ''}`;
   renderCalendarForYear();
-  const sorted=uploaded.sort((a,b)=>b.localeCompare(a));
-  let html=`<div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--text2);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase">Recent Uploads</div>`;
-  sorted.slice(0,15).forEach(date=>{
-    const label=new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
-    html+=`<div class="upload-history-item"><span class="date">${label}</span><span>${counts[date].toLocaleString()} rows</span><span class="pill">${date}</span></div>`;
+  const sorted = uploaded.sort((a,b) => b.localeCompare(a));
+  let html = `<div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--text2);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase">Recent Uploads</div>`;
+  sorted.slice(0, 15).forEach(date => {
+    const label = new Date(date + 'T00:00:00').toLocaleDateString('en-IN', {weekday:'short', day:'2-digit', month:'short', year:'numeric'});
+    html += `<div class="upload-history-item"><span class="date">${label}</span><span>${counts[date].toLocaleString()} rows</span><span class="pill">${date}</span></div>`;
   });
-  if(sorted.length>15) html+=`<div style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);text-align:center;margin-top:8px">+${sorted.length-15} more (see calendar)</div>`;
-  document.getElementById('historyList').innerHTML=html;
+  if (sorted.length > 15) html += `<div style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);text-align:center;margin-top:8px">+${sorted.length - 15} more (see calendar)</div>`;
+  document.getElementById('historyList').innerHTML = html;
 }
 
-function renderCalendarForYear(){
-  const year=parseInt(document.getElementById('calYearSelect')?.value||new Date().getFullYear());
-  renderCalendar(_historyCounts,_historyMaxCount,year);
+function renderCalendarForYear() {
+  const year = parseInt(document.getElementById('calYearSelect')?.value || new Date().getFullYear());
+  renderCalendar(_historyCounts, _historyMaxCount, year);
 }
 
-function renderCalendar(counts,maxCount,year){
-  const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const today=new Date();
-  const toKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  const isWE=d=>d.getDay()===0||d.getDay()===6;
-  const cellCls=d=>{
-    if(isWE(d)) return 'cal-day weekend';
-    const k=toKey(d);
-    if(!counts[k]) return 'cal-day no-data';
-    const r=counts[k]/maxCount;
-    if(r<0.33) return 'cal-day uploaded-lo';
-    if(r<0.66) return 'cal-day uploaded-mid';
-    return 'cal-day uploaded-hi';
+function renderCalendar(counts, maxCount, year) {
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const today  = new Date();
+  const toKey  = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const isWE   = d => d.getDay() === 0 || d.getDay() === 6;
+  const cellCls = d => {
+    if (isWE(d)) return 'cal-day weekend';
+    const k = toKey(d);
+    if (!counts[k]) return 'cal-day no-data';
+    const r = counts[k] / maxCount;
+    return r < 0.33 ? 'cal-day uploaded-lo' : r < 0.66 ? 'cal-day uploaded-mid' : 'cal-day uploaded-hi';
   };
-  const tip=d=>{
-    const k=toKey(d);
-    const label=d.toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short'});
-    if(isWE(d)) return `${label} — Weekend`;
-    if(!counts[k]) return `${label} — Not uploaded`;
+  const tip = d => {
+    const k     = toKey(d);
+    const label = d.toLocaleDateString('en-IN', {weekday:'short', day:'2-digit', month:'short'});
+    if (isWE(d))    return `${label} — Weekend`;
+    if (!counts[k]) return `${label} — Not uploaded`;
     return `${label} — ${counts[k].toLocaleString()} rows`;
   };
-  let html='<div class="cal-year">';
-  for(let m=0;m<12;m++){
-    const dim=new Date(year,m+1,0).getDate();
-    const firstDow=(new Date(year,m,1).getDay()+6)%7;
-    const totalCells=Math.ceil((firstDow+dim)/7)*7;
-    const cells=[];
-    for(let i=0;i<totalCells;i++){
-      const dn=i-firstDow+1;
-      if(dn<1||dn>dim){cells.push(null);continue;}
-      const d=new Date(year,m,dn);
-      cells.push(d>today?null:d);
+  let html = '<div class="cal-year">';
+  for (let m = 0; m < 12; m++) {
+    const dim       = new Date(year, m+1, 0).getDate();
+    const firstDow  = (new Date(year, m, 1).getDay() + 6) % 7;
+    const totalCells = Math.ceil((firstDow + dim) / 7) * 7;
+    const cells = [];
+    for (let i = 0; i < totalCells; i++) {
+      const dn = i - firstDow + 1;
+      if (dn < 1 || dn > dim) { cells.push(null); continue; }
+      const d = new Date(year, m, dn);
+      cells.push(d > today ? null : d);
     }
-    const nw=totalCells/7;
-    html+=`<div class="cal-month-block">`;
-    html+=`<div class="cal-month-name">${MONTHS[m]}</div>`;
-    html+=`<div style="display:flex;gap:2px">`;
-    html+=`<div class="cal-dow-labels">`;
-    ['M','T','W','T','F','S','S'].forEach(l=>{html+=`<div class="cal-dow-label">${l}</div>`;});
-    html+=`</div>`;
-    for(let w=0;w<nw;w++){
-      html+=`<div style="display:flex;flex-direction:column;gap:2px">`;
-      for(let row=0;row<7;row++){
-        const d=cells[w*7+row];
-        if(!d){html+=`<div class="cal-day empty"></div>`;}
-        else{html+=`<div class="${cellCls(d)}" title="${tip(d)}"></div>`;}
+    const nw = totalCells / 7;
+    html += `<div class="cal-month-block"><div class="cal-month-name">${MONTHS[m]}</div><div style="display:flex;gap:2px">`;
+    html += `<div class="cal-dow-labels">`;
+    ['M','T','W','T','F','S','S'].forEach(l => { html += `<div class="cal-dow-label">${l}</div>`; });
+    html += `</div>`;
+    for (let w = 0; w < nw; w++) {
+      html += `<div style="display:flex;flex-direction:column;gap:2px">`;
+      for (let row = 0; row < 7; row++) {
+        const d = cells[w*7 + row];
+        html += d ? `<div class="${cellCls(d)}" title="${tip(d)}"></div>` : `<div class="cal-day empty"></div>`;
       }
-      html+=`</div>`;
+      html += `</div>`;
     }
-    html+=`</div></div>`;
+    html += `</div></div>`;
   }
-  html+='</div>';
-  document.getElementById('calendarWrap').innerHTML=html;
+  html += '</div>';
+  document.getElementById('calendarWrap').innerHTML = html;
 }
 
 // ─── EXPORT ───────────────────────────────────────────────────────────────────
-async function exportCSV(mode='all'){
-  showToast('⏳ Preparing...','success');
-  const series=document.getElementById('filterSeries')?.value||'EQ';
-  const from=document.getElementById('filterFrom')?.value;
-  const to=document.getElementById('filterTo')?.value;
-  const PAGE=1000; let all=[],page=0;
-  while(true){
-    let q=sb.from(TABLE).select('trade_date,ticker,change_pct').order('trade_date',{ascending:false}).order('ticker').range(page*PAGE,(page+1)*PAGE-1);
-    if(series!=='ALL') q=q.eq('series',series);
-    if(from) q=q.gte('trade_date',from);
-    if(to)   q=q.lte('trade_date',to);
-    const {data,error}=await q; if(error||!data?.length) break; all=all.concat(data); if(data.length<PAGE) break; page++;
+async function exportCSV(mode = 'all') {
+  showToast('⏳ Preparing...', 'success');
+  const series = document.getElementById('filterSeries')?.value || 'EQ';
+  const from   = document.getElementById('filterFrom')?.value;
+  const to     = document.getElementById('filterTo')?.value;
+  const PAGE   = 1000; let all = [], page = 0;
+  while (true) {
+    let q = sb.from(TABLE).select('trade_date,ticker,change_pct')
+      .order('trade_date', { ascending:false }).order('ticker')
+      .range(page*PAGE, (page+1)*PAGE-1);
+    if (series !== 'ALL') q = q.eq('series', series);
+    if (from) q = q.gte('trade_date', from);
+    if (to)   q = q.lte('trade_date', to);
+    const { data, error } = await q;
+    if (error || !data?.length) break; all = all.concat(data); if (data.length < PAGE) break; page++;
   }
-  let filtered=all;
-  if(mode==='mtf') filtered=all.filter(r=>mtfTickers.has(r.ticker));
-  if(!filtered.length){showToast('No data','warn');return;}
-  const dates=[...new Set(filtered.map(r=>r.trade_date))].sort((a,b)=>b.localeCompare(a));
-  const stocks=[...new Set(filtered.map(r=>r.ticker))].sort();
-  const g={};filtered.forEach(r=>{if(!g[r.ticker])g[r.ticker]={};g[r.ticker][r.trade_date]=r.change_pct;});
-  let csv='Stock,'+dates.join(',')+'\n';
-  stocks.forEach(t=>{csv+=t+','+dates.map(d=>{const v=g[t]?.[d];return v!=null?parseFloat(v).toFixed(2):'NA';}).join(',')+'\n';});
-  const label=mode==='mtf'?'mtf':'full';
-  const suf=(from&&to)?`${from}_to_${to}`:dates[dates.length-1]+'_to_'+dates[0];
-  triggerDownload(csv,`bhav_pct_${label}_${suf}.csv`);
-  showToast(`✓ ${label.toUpperCase()} CSV (${stocks.length}×${dates.length})`,'success');
+  let filtered = all;
+  if (mode === 'mtf') filtered = all.filter(r => mtfTickers.has(r.ticker));
+  if (!filtered.length) { showToast('No data', 'warn'); return; }
+  const dates  = [...new Set(filtered.map(r => r.trade_date))].sort((a,b) => b.localeCompare(a));
+  const stocks = [...new Set(filtered.map(r => r.ticker))].sort();
+  const g = {}; filtered.forEach(r => { if (!g[r.ticker]) g[r.ticker] = {}; g[r.ticker][r.trade_date] = r.change_pct; });
+  let csv = 'Stock,' + dates.join(',') + '\n';
+  stocks.forEach(t => { csv += t + ',' + dates.map(d => { const v = g[t]?.[d]; return v != null ? parseFloat(v).toFixed(2) : 'NA'; }).join(',') + '\n'; });
+  const label = mode === 'mtf' ? 'mtf' : 'full';
+  const suf   = (from && to) ? `${from}_to_${to}` : `${dates[dates.length-1]}_to_${dates[0]}`;
+  triggerDownload(csv, `bhav_pct_${label}_${suf}.csv`);
+  showToast(`✓ ${label.toUpperCase()} CSV (${stocks.length}×${dates.length})`, 'success');
 }
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-function fmtDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-function fmtVol(v){
-  if(!v||v<=0) return '';
-  if(v>=10000000) return (v/10000000).toFixed(1)+'Cr';
-  if(v>=100000)   return (v/100000).toFixed(1)+'L';
-  if(v>=1000)     return (v/1000).toFixed(1)+'K';
+function fmtDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function fmtVol(v) {
+  if (!v || v <= 0) return '';
+  if (v >= 10000000) return (v/10000000).toFixed(1) + 'Cr';
+  if (v >= 100000)   return (v/100000).toFixed(1)   + 'L';
+  if (v >= 1000)     return (v/1000).toFixed(1)     + 'K';
   return String(v);
 }
-function clearFilters(){
-  ['filterFrom','filterTo'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('filterSeries').value='EQ';
-  document.getElementById('watchlistInput').value='';
+function clearFilters() {
+  ['filterFrom','filterTo'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('filterSeries').value = 'EQ';
+  document.getElementById('watchlistInput').value = '';
   loadData();
 }
-function clearUpload(){
-  parsedRows=[];
-  document.getElementById('csvFile').value='';
-  document.getElementById('uploadBtn').disabled=true;
-  clearStatus();showProgress(0);
+function clearUpload() {
+  parsedRows = [];
+  document.getElementById('csvFile').value = '';
+  document.getElementById('uploadBtn').disabled = true;
+  clearStatus(); showProgress(0);
   document.getElementById('progressWrap').classList.remove('show');
 }
-function clearStatus(){const b=document.getElementById('statusBox');b.innerHTML='';b.classList.remove('show');}
-function addStatus(type,msg){
-  const b=document.getElementById('statusBox');b.classList.add('show');
-  const l=document.createElement('div');l.className='status-line '+type;l.textContent=msg;b.appendChild(l);b.scrollTop=b.scrollHeight;
+function clearStatus() { const b = document.getElementById('statusBox'); b.innerHTML = ''; b.classList.remove('show'); }
+function addStatus(type, msg) {
+  const b = document.getElementById('statusBox'); b.classList.add('show');
+  const l = document.createElement('div'); l.className = 'status-line ' + type; l.textContent = msg;
+  b.appendChild(l); b.scrollTop = b.scrollHeight;
 }
-function addBoxStatus(box,type,msg){
+function addBoxStatus(box, type, msg) {
   box.classList.add('show');
-  const l=document.createElement('div');l.className='status-line '+type;l.textContent=msg;box.appendChild(l);
+  const l = document.createElement('div'); l.className = 'status-line ' + type; l.textContent = msg;
+  box.appendChild(l);
 }
-function showProgress(pct){
-  const w=document.getElementById('progressWrap'),b=document.getElementById('progressBar');
-  pct>0?w.classList.add('show'):w.classList.remove('show');b.style.width=pct+'%';
+function showProgress(pct) {
+  const w = document.getElementById('progressWrap'), b = document.getElementById('progressBar');
+  pct > 0 ? w.classList.add('show') : w.classList.remove('show'); b.style.width = pct + '%';
 }
-function triggerDownload(csv,fn){
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=fn;a.click();
+function triggerDownload(csv, fn) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = fn; a.click();
 }
 let toastTimer;
-function showToast(msg,type='success'){
-  const t=document.getElementById('toast');t.textContent=msg;t.className='show '+type;
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.className='';},3500);
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast'); t.textContent = msg; t.className = 'show ' + type;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.className = ''; }, 3500);
 }
 </script>
 </body>
